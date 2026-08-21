@@ -1,831 +1,744 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Existing scripts for video and XLSX handling -->
-  <script type="text/javascript">
-    var gk_isXlsx = false;
-    var gk_xlsxFileLookup = {};
-    var gk_fileData = {};
-    function filledCell(cell) {
-      return cell !== '' && cell != null;
-    }
-    function loadFileData(filename) {
-      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-        try {
-          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-          var firstSheetName = workbook.SheetNames[0];
-          var worksheet = workbook.Sheets[firstSheetName];
-          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-          var filteredData = jsonData.filter(row => row.some(filledCell));
-          var headerRowIndex = filteredData.findIndex((row, index) =>
-            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-          );
-          if (headerRowIndex === -1 || headerRowIndex > 25) headerRowIndex = 0;
-          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
-          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-          return csv;
-        } catch (e) {
-          console.error(e);
-          return "";
-        }
-      }
-      return gk_fileData[filename] || "";
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DU Admission — MCQ Practice</title>
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>পড় মন দিয়া</title>
-  <link rel="icon" href="https://cdn-icons-png.freepik.com/512/7856/7856382.png" type="image/png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet">
- <style>
-  /* Base Styles */
-  html, body {
-    margin: 0;
-    padding: 0;
-    /* Use a clean, sans-serif font */
-    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #171717; /* Very dark background */
-    color: #e0e0e0; /* Light text color */
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  /* Header/Navbar Area */
-  header {
-    background-color: #171717; /* Background remains dark */
-    /* Remove padding and margin specific to the header to make it full width */
-    padding: 0;
-    margin: 0;
-    max-width: 100%;
-    width: 100%;
-    box-sizing: border-box;
-    /* Add padding for the content inside */
-    padding: 1rem 2rem; 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #282828; /* Subtle bottom border */
-  }
-  
-  /* Logo/Title area styling (e.g., if there's a title with specific colors) */
-  .logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #f0f0f0;
-    display: flex;
-    align-items: center;
-  }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script>
 
-  /* Main Content Layout (simulating a two-column or split layout) */
-  .main-content-container {
-    display: flex;
-    gap: 1.5rem;
-    padding: 1.5rem 2rem;
-    max-width: 1200px; /* Max width for content */
-    margin: 0 auto;
-  }
-
-  /* Left Panel: Live Class (Video Player and Buttons) */
-  .live-class-panel {
-    flex: 3; /* Takes up more space */
-  }
-
-  /* Right Panel: Class List */
-  .class-list-panel {
-    flex: 1.2; /* Takes up less space */
-    min-width: 300px;
-    background-color: #212121; /* Slightly lighter background for the list container */
-    border-radius: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Card/Container styles (e.g., the video player container) */
-  .bg-white {
-    /* Used for the overall container in the image, e.g., surrounding the player */
-    background-color: #212121 !important; 
-    border: none; /* No border visible in the image */
-    border-radius: 0.5rem;
-    padding: 0; /* Remove internal padding to allow player to touch edges */
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Headings for the sections */
-  .section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #55aaff; /* Blue color for the section title (Live Class / Class List) */
-    display: flex;
-    align-items: center;
-    padding: 0 1rem 0.5rem;
-  }
-  
-  .class-list-panel .section-title {
-    padding: 0 0 0.5rem 0; /* Adjust padding for the list panel */
-  }
-
-  /* Text Colors/Sizes */
-  .text-gray-100, .text-lg {
-    color: #e0e0e0 !important;
-  }
-
-  /* Class List Styles */
-  #classList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  #classList li {
-    color: #e0e0e0;
-    padding: 0.75rem 1rem;
-    border-radius: 0.4rem;
-    background-color: transparent; /* Default transparent */
-    margin-bottom: 0.3rem;
-    transition: background-color 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-  
-  /* Style for the active/selected class item */
-  #classList li:first-child { 
-    background-color: #0b1f3c; /* Dark blue background for selected item */
-    color: #55aaff; /* Blue text color for selected item */
-  }
-
-  #classList li:not(:first-child):hover {
-    background-color: #2b2b2b; /* Hover for non-selected items */
-  }
-  
-  .list-item-icon {
-    color: #e0e0e0; /* Default icon color */
-  }
-  
-  #classList li:first-child .list-item-icon {
-    color: #55aaff; /* Blue icon color for selected item */
-  }
-
-
-  /* Button Styles (Download PDF & Open on YouTube) */
-  .button-group {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .download-pdf-button, .open-youtube-button {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.4rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    border: none;
-    font-size: 1rem;
-  }
-
-  .download-pdf-button {
-    background-color: #38a169; /* Green background */
-    color: #fff;
-  }
-  
-  .download-pdf-button:hover {
-    background-color: #2f855a;
-  }
-
-  .open-youtube-button {
-    background-color: #55aaff; /* Blue background */
-    color: #fff;
-  }
-  
-  .open-youtube-button:hover {
-    background-color: #4499ee;
-  }
-
-  /* Ensure video player container matches background */
-  .plyr {
-    border-radius: 0.5rem;
-    background-color: #212121; /* Match main container background */
-    overflow: hidden;
-    max-width: 100%;
-  }
-
-  /* Footer/Quote Area */
-  .footer-quotes {
-    font-size: 0.85rem;
-    color: #888;
-    text-align: right; /* Match alignment in the image */
-    margin-top: 0;
-    padding: 0 1rem 1rem;
-  }
-
-  .footer-quotes p {
-    margin: 0.4rem 0;
-  }
-
-  /* Hide elements not present in the image */
-  header {
-    /* Assuming header has the logo and the quote on the right */
-    background-color: #171717;
-  }
-  
-  .bg-blue-200 { /* Not explicitly visible in the final desired look */
-    display: none !important;
-  }
-  
-  .text-red-500 {
-    color: #e74c3c; /* A deep red for contrast, if used */
-  }
-  
-  .shadow-md {
-    /* Use for any remaining general shadow/border elements */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  h1, h2, footer { /* Hide or style elements not matching the image's structure */
-    display: none; /* Hide generic headers/footers if they clash with the image */
-  }
-
-  /* Media Queries for Responsiveness */
-  @media (max-width: 1024px) {
-    .main-content-container {
-      flex-direction: column;
-      padding: 1rem;
-    }
-    
-    .live-class-panel, .class-list-panel {
-      flex: none;
-      min-width: unset;
-    }
-  }
-
-  @media (max-width: 768px) {
-    header {
-      padding: 0.75rem 1rem;
-    }
-    
-    .button-group {
-      flex-direction: column;
-    }
-
-    .download-pdf-button, .open-youtube-button {
-      font-size: 0.9rem;
-      padding: 0.6rem 1rem;
-    }
-    
-    .section-title {
-      padding: 0 0.5rem 0.5rem;
-    }
-  }
-</style>
-
-</head>
-<body class="font-sans">
-  <header class="bg-black text-white p-4 flex items-center">
-    <img src="https://bondipathshala.com.bd/files/logo.png" alt="Bondi Pathshala Logo" class="h-10">
-    <h1 class="ml-4 text-xl font-bold">পড়ালেখা করা ভালো</h1>
-  </header>
-
-  <div class="container mx-auto p-4 flex flex-col lg:flex-row gap-4">
-    <div class="lg:w-3/4 bg-white rounded-lg shadow-md p-4">
-      <h2 class="text-lg font-semibold mb-4 text-gray-100">Live Class</h2>
-      <div style="position: relative;"> <!-- Wrapper for player and custom share button -->
-        <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="RUQcm3vIbWo"></div>
-        <button id="customShareBtn" title="Share" style="position: absolute; top: 15px; right: 15px; z-index: 20; background: none; border: none; cursor: pointer; padding: 0;">
-          <i class="fas fa-share-alt" style="color: white; font-size: 20px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));"></i>
-        </button>
-      </div>
-      <div class="flex space-x-4 mt-4">
-        <a id="downloadPdfBtn" href="https://www.bondipathshala.com.bd/pdf/20240527-1716748184-LRH05IsN.pdf" target="_blank" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          <i class="fas fa-file-pdf mr-2"></i>Download PDF
-        </a>
-        <button id="downloadEmojiBtn" class="download-emoji">
-          <i class="fas fa-smile mr-2"></i>Open on YouTube
-        </button>
-      </div>
-    </div>
-
-    <div class="lg:w-1/4 bg-white rounded-lg shadow-md p-4">
-      <button id="openAddVideoBtn" class="w-full bg-black text-white p-2 rounded mb-4 fake-button">
-        <i class="fas fa-plus mr-2"></i>Add New Class
-      </button>
-
-      <h2 class="text-lg font-semibold mb-4 text-gray-100">Class List</h2>
-      <ul id="classList" class="space-y-2 max-h-96 overflow-y-auto">
-       <li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="BzX25StCOyQ" data-nname="জৈব যৌগের ইতিহাস - পর্ব ০১" data-npdf="20250521-1747767276-zTUgBskf.pdf">
-  জৈব যৌগের ইতিহাস - পর্ব ০১ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-<li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="a_tsletdZjs" data-nname="জৈব যৌগের ইতিহাস - পর্ব ০২" data-npdf="20250525-1748120787-RXz1vtTE.pdf">
-  জৈব যৌগের ইতিহাস - পর্ব ০২ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-<li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="9055Ce-Ehd4" data-nname="জৈব যৌগের ইতিহাস  - পর্ব ০৩" data-npdf="20250526-1748209809-b0ltKw7V.pdf">
-  জৈব যৌগের ইতিহাস  - পর্ব ০৩ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-<li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="CVCW92j2zSw" data-nname="জৈব যৌগ - পর্ব ০৪" data-npdf="20250529-1748503530-x3r34ooq.pdf">
-  জৈব যৌগের ইতিহাস - পর্ব ০৪ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-<li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="XqMsgz9yTto" data-nname="জৈব যৌগ - পর্ব ০৫" data-npdf="20250530-1748546953-jhRBbO4q.pdf">
-  জৈব যৌগের ইতিহাস - পর্ব ০৫ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-        <li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="vaF4aRwLdok">
-  জৈব রসায়ন - পর্ব ০৬
-</li>
-<li class="class-item p-2 rounded hover:bg-blue-100 cursor-pointer" data-vid="HqF4pBphbKM" data-nname="সমানুতা - পর্ব ০১" data-npdf="20250620-1750424001-AZt5hROq.pdf">
-  সমানুতা - পর্ব ০১ <i class="fas fa-file-pdf text-red-500 ml-2"></i>
-</li>
-      </ul>
-    </div>
-  </div>
-
-<footer class="bg-gray-900 text-white py-8 px-4 md:px-8 relative overflow-hidden">
-  <!-- Neon Glow Background Effect -->
-  <div class="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-cyan-500/20 to-lime-500/20 animate-pulse"></div>
-  
-  <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left relative z-10">
-    <!-- Brand/Logo Section -->
-    <div>
-      <h2 class="text-3xl font-extrabold tracking-wider text-lime-400>Bondi Pathshala</h2>
-      <p class="mt-2 text-lime-300 t-medium">Bondi Pathshala</p>
-    </div>
-
-    <!-- Navigation Links -->
-    <div>
-      <h3 class="text-lg font-bold text-lime-400 mb-4 drop-shadow-[0_0_8px_rgba(132,204,22,0.6)]">মন ফ্রেশ থাকলে পড়া বেশি মনে থাকে!</h3>
-      <ul class="space-y-2 text-cyan-300 text-sm">
-  <li>পড়ায় ঝড় তুলো!</li>
-  <li>রঙিন নোট ফাটাও!</li>
-  <li> বই পড়ো!</li>
-      </ul>
-    </div>
-
-    <!-- Social Media & Contact -->
-    <div>
-      <h3 class="text-lg font-bold text-lime-400 mb-4 drop-shadow-[0_0_8px_rgba(132,204,22,0.6)]">Connect With Us</h3>
-      <div class="flex justify-center md:justify-start space-x-4 mb-4">
-        <a href="#" class="hover:scale-110 transform transition-transform duration-300 drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]">
-          <svg class="w-6 h-6 fill-current text-cyan-300 hover:text-pink-400" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-          </svg>
-        </a>
-        <a href="#" class="hover:scale-110 transform transition-transform duration-300 drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]">
-          <svg class="w-6 h-6 fill-current text-cyan-300 hover:text-pink-400" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 14v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-          </svg>
-        </a>
-      </div>
-      <p class="text-cyan-300 text-sm font-medium">Email: <a href="mailto:arnoy799@gmail.com" class="hover:text-pink-400 transition-colors duration-300 hover:drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]">arnoy799@gmail.com</a></p>
-    </div>
-  </div>
-
-  <!-- Bottom Bar -->
-  <div class="border-t border-pink-500/50 mt-8 pt-4 text-center text-cyan-300 text-sm font-medium">
-    <p>© 2025 Bondi Pathshala. All rights reserved.</p>
-  </div>
-</footer>
-
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
-  const player = new Plyr('#player', {
-    controls: ['play-large', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 'settings', 'pip', 'fullscreen'],
-    youtube: { noCookie: true, rel: 0, showinfo: 0, modestbranding: 1 },
-    settings: ['quality', 'speed'],
-    speed: { selected: 1, options: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] }
-  });
-
-const container = player.elements.container;
-
-// Create skip buttons
-const skipLeft = document.createElement('button');
-const skipRight = document.createElement('button');
-
-// Set icons (replace with your image URLs)
-skipLeft.innerHTML = `<img src="https://cdn-icons-png.freepik.com/512/4553/4553697.png" alt="Back" style="width:28px;height:28px;">`;
-skipRight.innerHTML = `<img src="https://cdn-icons-png.freepik.com/512/4553/4553697.png" alt="Forward" style="width:28px;height:28px;">`;
-
-// Common style
-const styleSkipButton = (btn, position) => {
-  Object.assign(btn.style, {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    background: '#3a3a3a',
-    border: 'none',
-    borderRadius: '50%',
-    padding: '16px',
-    zIndex: 12,
-    opacity: 0,
-    transition: 'opacity 0.3s',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  });
-  btn.style.left = position;
-};
-
-// Position buttons near center
-styleSkipButton(skipLeft, 'calc(50% - 120px)');
-styleSkipButton(skipRight, 'calc(50% + 60px)');
-
-// Append to player
-container.style.position = 'relative';
-container.appendChild(skipLeft);
-container.appendChild(skipRight);
-
-// Click actions
-skipLeft.addEventListener('click', () => {
-  player.currentTime = Math.max(0, player.currentTime - 10);
-  showToast('⏪ 10s');
-});
-skipRight.addEventListener('click', () => {
-  player.currentTime = Math.min(player.duration, player.currentTime + 10);
-  showToast('⏩ 10s');
-});
-
-// Show/hide on interaction or pause
-function showSkipButtons() {
-  skipLeft.style.opacity = '1';
-  skipRight.style.opacity = '1';
-  skipLeft.style.pointerEvents = 'auto';
-  skipRight.style.pointerEvents = 'auto';
-  clearTimeout(skipLeft._timeout);
-  skipLeft._timeout = setTimeout(hideSkipButtons, 700);
-}
-function hideSkipButtons() {
-  skipLeft.style.opacity = '0';
-  skipRight.style.opacity = '0';
-  skipLeft.style.pointerEvents = 'none';
-  skipRight.style.pointerEvents = 'none';
-}
-
-['mousemove', 'touchstart'].forEach(evt =>
-  container.addEventListener(evt, showSkipButtons)
-);
-player.on('pause', showSkipButtons);
-player.on('play', hideSkipButtons);
-
-  function setHighestQuality() {
-    const availableQualities = player.quality?.options;
-    if (availableQualities && availableQualities.length > 0) {
-      const sorted = availableQualities.filter(q => q !== 'auto').sort((a, b) => parseInt(b) - parseInt(a));
-      if (sorted.length > 0) {
-        player.quality = sorted[0];
-        console.log(`Set highest quality: ${sorted[0]}`);
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { DEFAULT: '#0a0908', 50:'#f0eae0' },
+          surface: { DEFAULT: '#15130f', 2: '#1c1914' },
+          hairline: '#2b2620',
+          brass: { DEFAULT: '#c9a24b', bright: '#e3c179', dim: '#8a6f36' },
+          sage: '#5fa87d',
+          rust: '#c1584a',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
       }
     }
   }
-
-  function attachClassItemListeners() {
-    const classItems = document.querySelectorAll('.class-item');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-
-    classItems.forEach(item => {
-      if (item._eventListener) item.removeEventListener('click', item._eventListener);
-    });
-
-    classItems.forEach(item => {
-      const listener = () => {
-        const videoId = item.dataset.vid;
-        currentVideoId = videoId;
-        localStorage.setItem('lastSelectedVideo', videoId);
-
-        player.source = {
-          type: 'video',
-          sources: [{ src: videoId, provider: 'youtube' }]
-        };
-
-        const customShareBtn = document.getElementById('customShareBtn');
-        if (customShareBtn) {
-          customShareBtn.addEventListener('click', () => {
-            if (currentVideoId) {
-              const url = `https://www.youtube.com/watch?v=${currentVideoId}`;
-              navigator.clipboard.writeText(url).then(() => alert('Video link copied!'))
-                .catch(() => alert('Copy failed.'));
-            } else alert("No video selected.");
-          });
-        }
-
-        classItems.forEach(i => i.classList.remove('bg-blue-200'));
-        item.classList.add('bg-blue-200');
-
-        const pdfLink = item.dataset.npdf;
-        if (pdfLink) {
-          downloadPdfBtn.href = `https://www.bondipathshala.com.bd/pdf/${pdfLink}`;
-          downloadPdfBtn.classList.remove('hidden');
-        } else {
-          downloadPdfBtn.classList.add('hidden');
-        }
-      };
-      item.addEventListener('click', listener);
-      item._eventListener = listener;
-    });
-  }
-
-  attachClassItemListeners();
-
-  // Load stored videos
-  const storedVideos = JSON.parse(localStorage.getItem('customVideos')) || [];
-  const classListUl = document.getElementById('classList');
-  storedVideos.forEach(video => {
-    const li = document.createElement('li');
-    li.className = 'class-item p-2 rounded hover:bg-blue-100 cursor-pointer';
-    li.dataset.vid = video.id;
-    li.dataset.nname = video.title;
-    li.dataset.npdf = video.pdfLink || '';
-    li.innerHTML = `${video.title}${video.pdfLink ? ` <i class="fas fa-file-pdf text-red-500 ml-2"></i>` : ''}`;
-    classListUl.appendChild(li);
-  });
-  attachClassItemListeners();
-
-  // Resume last watched
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const lastVideoId = localStorage.getItem('lastSelectedVideo');
-      if (lastVideoId) {
-        const lastItem = [...document.querySelectorAll('.class-item')].find(i => i.dataset.vid === lastVideoId);
-        if (lastItem) {
-          lastItem.click();
-          lastItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    }, 3500);
-  });
-
-function showToast(message) {
-  const toast = document.getElementById('playerToast');
-  toast.textContent = message;
-  toast.style.opacity = '1';
-  clearTimeout(toast._hideTimeout);
-  toast._hideTimeout = setTimeout(() => {
-    toast.style.opacity = '0';
-  }, 1500);
-}
-
-  // Download button
-  const downloadEmojiBtn = document.getElementById('downloadEmojiBtn');
-  if (downloadEmojiBtn) {
-    downloadEmojiBtn.addEventListener('click', () => {
-      if (currentVideoId) {
-        window.open(`https://www.youtube.com/watch?v=${currentVideoId}`, '_blank');
-      } else {
-        alert("No video selected");
-      }
-    });
-  }
-
-  // Global keyboard shortcuts like YouTube
-  window.addEventListener('keydown', event => {
-    const tag = event.target.tagName.toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || event.target.isContentEditable) return;
-
-    const key = event.key.toLowerCase();
-switch (key) {
-case 'k':
-case ' ':
-  event.preventDefault();
-  player.togglePlay();
-  showToast(player.playing ? 'Playing' : 'Paused');
-  break;
-
-case 'arrowup':
-  event.preventDefault();
-  player.volume = Math.min(1, player.volume + 0.1);
-  showToast(`Volume: ${(player.volume * 100).toFixed(0)}%`);
-  break;
-
-case 'arrowdown':
-  event.preventDefault();
-  player.volume = Math.max(0, player.volume - 0.1);
-  showToast(`Volume: ${(player.volume * 100).toFixed(0)}%`);
-  break;
-
-case ',':
-  {
-    const current = player.speed;
-    const options = player.config.speed.options;
-    const index = options.indexOf(current);
-    if (index > 0) {
-      player.speed = options[index - 1];
-      showToast(`Speed: ${player.speed.toFixed(2)}x`);
-    }
-  }
-  break;
-
-case '.':
-  {
-    const current = player.speed;
-    const options = player.config.speed.options;
-    const index = options.indexOf(current);
-    if (index < options.length - 1) {
-      player.speed = options[index + 1];
-      showToast(`Speed: ${player.speed.toFixed(2)}x`);
-    }
-  }
-  break;
-
-case 'arrowleft':
-  player.currentTime = Math.max(0, player.currentTime - 5);
-  showToast(`⏪ -5s`);
-  break;
-
-case 'arrowright':
-  player.currentTime = Math.min(player.duration, player.currentTime + 5);
-  showToast(`⏩ +5s`);
-  break;
-
-case 'j':
-  player.currentTime = Math.max(0, player.currentTime - 10);
-  showToast(`⏪ -10s`);
-  break;
-
-case 'l':
-  player.currentTime = Math.min(player.duration, player.currentTime + 10);
-  showToast(`⏩ +10s`);
-  break;
-
-    }
-  });
-
-  // Save time every 10s
-  setInterval(() => {
-    if (player && currentVideoId && !player.paused) {
-      const progressKey = `videoProgress_${currentVideoId}`;
-      localStorage.setItem(progressKey, player.currentTime);
-    }
-  }, 10000);
-
-  // Resume time when ready
-  player.on('ready', () => {
-    setHighestQuality();
-    if (currentVideoId) {
-      const progressKey = `videoProgress_${currentVideoId}`;
-      const savedTime = parseFloat(localStorage.getItem(progressKey));
-      if (!isNaN(savedTime)) {
-        player.currentTime = savedTime;
-      }
-    }
-  });
-
-  player.on('sourcechange', () => {
-    setTimeout(() => {
-      setHighestQuality();
-      if (currentVideoId) {
-        const progressKey = `videoProgress_${currentVideoId}`;
-        const savedTime = parseFloat(localStorage.getItem(progressKey));
-        if (!isNaN(savedTime)) {
-          player.currentTime = savedTime;
-        }
-      }
-    }, 500);
-  });
-  
-  // Create help button
-const helpBtn = document.createElement('button');
-helpBtn.id = 'helpBtn';
-helpBtn.textContent = '?';
-Object.assign(helpBtn.style, {
-  position: 'fixed',
-  bottom: '20px',
-  right: '20px',
-  width: '40px',
-  height: '40px',
-  borderRadius: '50%',
-  backgroundColor: '#1e40af', // blue-800 dark
-  color: 'white',
-  border: 'none',
-  fontSize: '24px',
-  cursor: 'pointer',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.7)',
-  zIndex: '99999',
-});
-document.body.appendChild(helpBtn);
-
-// Create help popup
-const helpPopup = document.createElement('div');
-helpPopup.id = 'helpPopup';
-Object.assign(helpPopup.style, {
-  display: 'none',
-  position: 'fixed',
-  bottom: '75px',
-  right: '20px',
-  width: '300px',
-  backgroundColor: '#111827', // gray-900 dark
-  color: 'white',
-  borderRadius: '12px',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.8)',
-  padding: '16px 20px',
-  fontSize: '14px',
-  lineHeight: '1.5',
-  zIndex: '99999',
-  userSelect: 'none',
-  fontFamily: 'Arial, sans-serif',
-});
-helpPopup.innerHTML = `
-  <strong style="font-size:16px;display:block;margin-bottom:10px;">Keyboard Shortcuts</strong>
-  <ul style="padding-left: 18px; margin: 0;">
-    <li><b>K / Space</b>: Play / Pause</li>
-    <li><b>J / ←</b>: Rewind 10s / 5s</li>
-    <li><b>L / →</b>: Forward 10s / 5s</li>
-    <li><b>↑ / ↓</b>: Volume up / down</li>
-    <li><b>M</b>: Mute / Unmute</li>
-    <li><b>F</b>: Fullscreen toggle</li>
-    <li><b>, / .</b>: Speed down / up</li>
-    <li><b>?</b>: Toggle this help</li>
-  </ul>
-`;
-document.body.appendChild(helpPopup);
-
-// Toggle function
-function toggleHelp() {
-  helpPopup.style.display = helpPopup.style.display === 'block' ? 'none' : 'block';
-}
-
-// Button click toggles popup
-helpBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleHelp();
-});
-
-// Click outside closes popup
-document.addEventListener('click', (e) => {
-  if (!helpBtn.contains(e.target) && !helpPopup.contains(e.target)) {
-    helpPopup.style.display = 'none';
-  }
-});
-
-// Press ? key toggles popup
-document.addEventListener('keydown', (e) => {
-  if (e.key === '?') {
-    toggleHelp();
-  }
-});
-
-const playerElement = document.getElementById('player'); // your Plyr container
-
-let lastTapTime = 0;
-let lastTapX = 0;
-
-playerElement.addEventListener('touchend', (e) => {
-  const currentTime = Date.now();
-  const tapX = e.changedTouches[0].clientX;
-
-  // Check for double tap within 300ms and close horizontal position (100px)
-  if (currentTime - lastTapTime < 300 && Math.abs(tapX - lastTapX) < 100) {
-    const width = playerElement.clientWidth;
-    const tapSide = tapX < width / 2 ? 'left' : 'right';
-
-    if (tapSide === 'left') {
-      player.currentTime = Math.max(0, player.currentTime - 10);
-      showToast('⏪ 10s');
-    } else {
-      player.currentTime = Math.min(player.duration, player.currentTime + 10);
-      showToast('⏩ 10s');
-    }
-    lastTapTime = 0; // reset to avoid triple tap
-  } else {
-    lastTapTime = currentTime;
-    lastTapX = tapX;
-  }
-});
-
-// Optional: desktop double click support
-playerElement.addEventListener('dblclick', (e) => {
-  const rect = playerElement.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const width = playerElement.clientWidth;
-
-  if (clickX < width / 2) {
-    player.currentTime = Math.max(0, player.currentTime - 10);
-    showToast('⏪ 10s');
-  } else {
-    player.currentTime = Math.min(player.duration, player.currentTime + 10);
-    showToast('⏩ 10s');
-  }
-});
-
-
-
 </script>
 
-<div id="playerToast"
-     style="position: fixed; bottom: 10%; left: 50%; transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8); color: white;
-            padding: 10px 20px; border-radius: 8px;
-            font-size: 16px; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s ease;">
+<style>
+  :root{
+    --bg:#0a0908; --surface:#15130f; --surface-2:#1c1914;
+    --border:#2b2620; --border-soft:#211d18;
+    --text:#f0eae0; --text-muted:#a39c8c; --text-faint:#6b6459;
+    --accent:#c9a24b; --accent-bright:#e3c179; --accent-dim:#8a6f36;
+    --success:#5fa87d; --danger:#c1584a; --skip:#6b6459;
+  }
+  *{-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,75,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(201,162,75,0.04), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .font-display{font-family:'Fraunces',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
 
+  ::selection{background:rgba(201,162,75,0.35); color:#fff;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#2b2620; border-radius:8px; border:2px solid var(--bg);}
+  ::-webkit-scrollbar-thumb:hover{background:#3a342a;}
+
+  .card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:16px;
+  }
+
+  .mode-card{
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background .25s ease;
+  }
+  .mode-card:hover{ transform:translateY(-2px); border-color:#3a342a; }
+  .mode-card.active{
+    border-color:var(--accent);
+    background:linear-gradient(180deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+    box-shadow:0 0 0 1px rgba(201,162,75,0.25), 0 10px 30px -12px rgba(201,162,75,0.25);
+  }
+
+  .btn-primary{
+    background:linear-gradient(180deg, var(--accent-bright), var(--accent));
+    color:#1a1408;
+    font-weight:600;
+    transition: box-shadow .25s ease, transform .15s ease, filter .25s ease;
+    box-shadow: 0 6px 24px -8px rgba(201,162,75,0.45);
+  }
+  .btn-primary:hover:not(:disabled){ filter:brightness(1.08); box-shadow:0 10px 32px -8px rgba(201,162,75,0.6); transform:translateY(-1px); }
+  .btn-primary:active:not(:disabled){ transform:translateY(0px) scale(.99); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
+
+  .btn-ghost{
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    transition: all .2s ease;
+  }
+  .btn-ghost:hover{ border-color:var(--accent-dim); color:var(--accent-bright); background:rgba(201,162,75,0.06); }
+
+  textarea, input[type="number"]{
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea:focus, input[type="number"]:focus{
+    outline:none; border-color:var(--accent-dim); box-shadow:0 0 0 3px rgba(201,162,75,0.12);
+  }
+
+  .option-row{
+    border:1px solid var(--border);
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+    cursor:pointer;
+  }
+  .option-row:hover{ border-color:#3a342a; background:rgba(255,255,255,0.02); }
+  .option-row.selected{
+    border-color:var(--accent);
+    background:linear-gradient(90deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+  }
+  .radio-dot{
+    width:18px; height:18px; border-radius:50%;
+    border:1.5px solid var(--text-faint);
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color .2s ease;
+    flex-shrink:0;
+  }
+  .option-row.selected .radio-dot{ border-color:var(--accent-bright); }
+  .radio-dot-fill{
+    width:9px; height:9px; border-radius:50%; background:var(--accent-bright);
+    transform:scale(0); transition:transform .18s ease;
+  }
+  .option-row.selected .radio-dot-fill{ transform:scale(1); }
+
+  /* review mode colorings */
+  .opt-correct{ border-color:var(--success) !important; background:linear-gradient(90deg, rgba(95,168,125,0.12), rgba(95,168,125,0.02)) !important; }
+  .opt-incorrect{ border-color:var(--danger) !important; background:linear-gradient(90deg, rgba(193,88,74,0.12), rgba(193,88,74,0.02)) !important; }
+
+  .progress-track{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-fill{
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent-bright));
+    transition:width 1s linear;
+  }
+  .progress-ticks{
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(0,0,0,0.35) 23px, rgba(0,0,0,0.35) 24px);
+    pointer-events:none;
+  }
+
+  .timer-text{ transition: color .3s ease; }
+  .timer-danger{ color:var(--danger) !important; animation: pulse-red 1.4s ease-in-out infinite; }
+  @keyframes pulse-red{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+
+  .fade-in{ animation: fadeIn .5s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .stagger > *{ animation: fadeIn .45s ease both; }
+
+  .badge{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em;
+    padding:3px 10px; border-radius:999px; font-weight:600;
+  }
+  .badge-correct{ background:rgba(95,168,125,0.14); color:var(--success); border:1px solid rgba(95,168,125,0.35); }
+  .badge-incorrect{ background:rgba(193,88,74,0.14); color:var(--danger); border:1px solid rgba(193,88,74,0.35); }
+  .badge-skipped{ background:rgba(163,156,140,0.12); color:var(--text-muted); border:1px solid var(--border); }
+
+  .filter-tab{
+    transition:all .2s ease; border:1px solid var(--border); color:var(--text-muted);
+  }
+  .filter-tab.active{
+    border-color:var(--accent); color:var(--accent-bright); background:rgba(201,162,75,0.08);
+  }
+
+  .qnum{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--accent-bright);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+  }
+
+  .metric-card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:14px;
+  }
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, textarea:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent-bright); outline-offset:2px;
+  }
+
+  .katex{ font-size:1.05em; }
+  .katex-display{ margin:0.6em 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  .fixed-topbar{
+    background:rgba(10,9,8,0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+
+  .float-submit{
+    box-shadow:0 12px 40px -10px rgba(201,162,75,0.5);
+  }
+
+  .divider-brass{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- ============= SETUP SCREEN ============= -->
+<section id="screen-setup" class="screen active min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in mb-12 sm:mb-16 text-center">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-4">ঢাকা বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি</p>
+      <h1 class="font-display text-4xl sm:text-6xl font-medium tracking-tight leading-[1.05]">
+        Practice with<br class="sm:hidden"> <span class="italic text-brass-bright" style="color:var(--accent-bright)">precision</span>.
+      </h1>
+      <p class="text-[15px] sm:text-base text-white/50 mt-5 max-w-md mx-auto leading-relaxed">
+        A focused MCQ rehearsal room for Dhaka University admission — timed, distraction-free, and built for the exact way you'll be tested.
+      </p>
+    </div>
+
+    <!-- Mode selection -->
+    <div class="fade-in mb-10" style="animation-delay:.08s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">01 — Select Intensity</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mode-grid">
+        <button data-mode="average" data-seconds="45" class="mode-card active card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Average</p>
+          <p class="font-mono text-xs text-white/40">45s / question</p>
+        </button>
+        <button data-mode="fast" data-seconds="30" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Fast</p>
+          <p class="font-mono text-xs text-white/40">30s / question</p>
+        </button>
+        <button data-mode="lightspeed" data-seconds="15" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Lightspeed</p>
+          <p class="font-mono text-xs text-white/40">15s / question</p>
+        </button>
+        <button data-mode="custom" data-seconds="0" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Custom</p>
+          <p class="font-mono text-xs text-white/40">your own pace</p>
+        </button>
+      </div>
+      <div id="custom-seconds-wrap" class="hidden mt-4">
+        <label class="text-xs text-white/40 font-mono uppercase tracking-wider block mb-2">Seconds per question</label>
+        <input type="number" id="custom-seconds" min="5" max="600" value="40" class="w-full sm:w-48 rounded-xl px-4 py-2.5 font-mono text-sm">
+      </div>
+    </div>
+
+    <!-- JSON input -->
+    <div class="fade-in mb-10" style="animation-delay:.14s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">02 — Load Questions</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+
+      <div class="card rounded-2xl p-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div class="text-xs text-white/45 leading-relaxed max-w-xl">
+            <p class="text-white/70 font-medium mb-1.5">Expected JSON array format</p>
+            <pre class="font-mono text-[11px] text-white/40 bg-black/30 rounded-lg p-3 overflow-x-auto leading-relaxed border border-white/5">[{
+  "q": "What is the unit of force in $F = ma$?",
+  "options": ["$\\text{N}$", "$\\text{J}$", "$\\ce{H2O}$", "$\\text{W}$"],
+  "answer": 0
+}]</pre>
+            <p class="mt-2 text-white/35">Use <span class="text-brass">$...$</span> for inline math/physics and <span class="text-brass">\ce{...}</span> for chemistry — rendered via KaTeX + mhchem. <span class="font-mono text-white/50">answer</span> is the 0-indexed correct option.</p>
+          </div>
+          <button id="load-sample-btn" class="btn-ghost rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap shrink-0">
+            Load sample questions
+          </button>
+        </div>
+
+        <textarea id="json-input" rows="10" placeholder="Paste your JSON array of questions here…" class="w-full rounded-xl px-4 py-3.5 font-mono text-[13px] leading-relaxed resize-y"></textarea>
+
+        <div class="flex items-center justify-between mt-3">
+          <p id="json-status" class="text-xs font-mono text-white/30">No questions loaded yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Launch -->
+    <div class="fade-in flex flex-col items-center gap-3" style="animation-delay:.2s">
+      <button id="launch-btn" disabled class="btn-primary rounded-full px-10 py-4 text-base font-display tracking-wide">
+        Launch Practice
+      </button>
+      <p class="text-xs text-white/30 font-mono" id="launch-hint">Load valid questions to continue</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============= QUIZ SCREEN ============= -->
+<section id="screen-quiz" class="screen min-h-screen pb-32">
+  <div class="fixed-topbar fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Time remaining</p>
+          <p id="timer-text" class="timer-text font-mono text-2xl font-semibold leading-none mt-0.5">00:00</p>
+        </div>
+        <div class="text-right">
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Answered</p>
+          <p id="answered-count" class="font-mono text-2xl font-semibold leading-none mt-0.5 text-white/80">0 <span class="text-white/30 text-base">/ 0</span></p>
+        </div>
+      </div>
+      <div class="progress-track rounded-full h-2 w-full">
+        <div id="progress-fill" class="progress-fill h-full rounded-full relative" style="width:100%">
+          <div class="progress-ticks"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 pt-32 sm:pt-28">
+    <div id="quiz-list" class="stagger flex flex-col gap-5"></div>
+  </div>
+
+  <div class="fixed bottom-6 sm:bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
+    <button id="submit-btn" class="float-submit btn-primary pointer-events-auto rounded-full px-9 py-4 font-display text-base tracking-wide">
+      Submit Test
+    </button>
+  </div>
+</section>
+
+<!-- ============= RESULTS SCREEN ============= -->
+<section id="screen-results" class="screen min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in text-center mb-10">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-3" style="color:var(--accent)">Evaluation</p>
+      <h2 class="font-display text-3xl sm:text-5xl font-medium tracking-tight">Your results</h2>
+    </div>
+
+    <!-- Metrics -->
+    <div class="fade-in grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10" id="metrics-grid" style="animation-delay:.06s"></div>
+
+    <!-- Filters -->
+    <div class="fade-in flex items-center gap-2 mb-6 flex-wrap" id="filter-tabs" style="animation-delay:.1s">
+      <button data-filter="all" class="filter-tab active rounded-full px-4 py-2 text-sm font-medium">All</button>
+      <button data-filter="correct" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Correct</button>
+      <button data-filter="incorrect" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Incorrect</button>
+      <button data-filter="skipped" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Skipped</button>
+    </div>
+
+    <div id="review-list" class="stagger flex flex-col gap-5 mb-14"></div>
+
+    <div class="fade-in flex justify-center">
+      <button id="restart-btn" class="btn-ghost rounded-full px-8 py-3.5 text-sm font-medium">
+        ← Start a new practice
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Sample Data ---------------- */
+  const sampleQuestions = [
+    { q: "Differentiate: $\\dfrac{d}{dx}\\left(x^3 - 4x^2 + 2x\\right)$ equals?", options: ["$3x^2 - 8x + 2$", "$3x^2 - 4x + 2$", "$x^2 - 8x + 2$", "$3x^3 - 8x + 2$"], answer: 0 },
+    { q: "Evaluate: $\\displaystyle\\int_0^{\\pi} \\sin x \\, dx$", options: ["$0$", "$1$", "$2$", "$\\pi$"], answer: 2 },
+    { q: "If $\\log_2 x = 5$, what is the value of $x$?", options: ["$10$", "$25$", "$32$", "$16$"], answer: 2 },
+    { q: "The roots of $x^2 - 5x + 6 = 0$ are:", options: ["$1, 6$", "$2, 3$", "$-2, -3$", "$2, -3$"], answer: 1 },
+    { q: "A force $F = ma$ acts on a body of mass $2\\text{ kg}$ producing acceleration $3\\text{ m/s}^2$. Find $F$.", options: ["$5\\text{ N}$", "$6\\text{ N}$", "$1.5\\text{ N}$", "$9\\text{ N}$"], answer: 1 },
+    { q: "The SI unit of electric resistance is:", options: ["$\\text{Ampere}$", "$\\text{Volt}$", "$\\Omega \\;(\\text{Ohm})$", "$\\text{Farad}$"], answer: 2 },
+    { q: "Using $v = u + at$, find $v$ when $u = 0$, $a = 10\\text{ m/s}^2$, $t = 5\\text{ s}$.", options: ["$25\\text{ m/s}$", "$50\\text{ m/s}$", "$10\\text{ m/s}$", "$5\\text{ m/s}$"], answer: 1 },
+    { q: "Kinetic energy is given by $KE = \\dfrac{1}{2}mv^2$. If $m = 4\\text{ kg}$ and $v = 3\\text{ m/s}$, find $KE$.", options: ["$12\\text{ J}$", "$18\\text{ J}$", "$36\\text{ J}$", "$9\\text{ J}$"], answer: 1 },
+    { q: "Balance the equation: $\\ce{N2 + H2 -> NH3}$. What is the coefficient of $\\ce{H2}$?", options: ["$1$", "$2$", "$3$", "$4$"], answer: 2 },
+    { q: "What is produced when $\\ce{CaCO3}$ is heated strongly?", options: ["$\\ce{CaO + CO2}$", "$\\ce{Ca + O2}$", "$\\ce{CaC2 + O2}$", "$\\ce{Ca(OH)2}$"], answer: 0 },
+    { q: "The pH of a neutral aqueous solution at $25^{\\circ}\\text{C}$ is:", options: ["$0$", "$7$", "$14$", "$1$"], answer: 1 },
+    { q: "In $\\ce{2H2 + O2 -> 2H2O}$, how many moles of water form from $4$ moles of $\\ce{H2}$?", options: ["$2$", "$4$", "$1$", "$8$"], answer: 1 },
+  ];
+
+  /* ---------------- State ---------------- */
+  const state = {
+    mode: 'average',
+    secondsPerQ: 45,
+    questions: [],
+    answers: [],       // index or null per question
+    totalSeconds: 0,
+    remaining: 0,
+    timerId: null,
+    submitted: false,
+    startedAt: null,
+    filter: 'all',
+  };
+
+  /* ---------------- Elements ---------------- */
+  const el = (id) => document.getElementById(id);
+  const screens = {
+    setup: el('screen-setup'),
+    quiz: el('screen-quiz'),
+    results: el('screen-results'),
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+
+  /* ---------------- KaTeX render helper ---------------- */
+  function renderMath(container){
+    if(window.renderMathInElement){
+      renderMathInElement(container, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false},
+        ],
+        throwOnError:false,
+      });
+    }
+  }
+
+  /* ---------------- Setup Screen Logic ---------------- */
+  const modeGrid = el('mode-grid');
+  const customWrap = el('custom-seconds-wrap');
+  const customSecondsInput = el('custom-seconds');
+
+  modeGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-card');
+    if(!btn) return;
+    [...modeGrid.children].forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    if(state.mode === 'custom'){
+      customWrap.classList.remove('hidden');
+      state.secondsPerQ = parseInt(customSecondsInput.value, 10) || 40;
+    } else {
+      customWrap.classList.add('hidden');
+      state.secondsPerQ = parseInt(btn.dataset.seconds, 10);
+    }
+  });
+  customSecondsInput.addEventListener('input', () => {
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 5);
+    }
+  });
+
+  const jsonInput = el('json-input');
+  const jsonStatus = el('json-status');
+  const launchBtn = el('launch-btn');
+  const launchHint = el('launch-hint');
+
+  el('load-sample-btn').addEventListener('click', () => {
+    jsonInput.value = JSON.stringify(sampleQuestions, null, 2);
+    validateJson();
+  });
+
+  function validateJson(){
+    const raw = jsonInput.value.trim();
+    if(!raw){
+      jsonStatus.textContent = 'No questions loaded yet.';
+      jsonStatus.style.color = '';
+      launchBtn.disabled = true;
+      launchHint.textContent = 'Load valid questions to continue';
+      return null;
+    }
+    try{
+      const data = JSON.parse(raw);
+      if(!Array.isArray(data) || data.length === 0) throw new Error('Must be a non-empty array.');
+      data.forEach((item, i) => {
+        if(typeof item.q !== 'string') throw new Error(`Question ${i+1} missing "q" string.`);
+        if(!Array.isArray(item.options) || item.options.length < 2) throw new Error(`Question ${i+1} needs an "options" array.`);
+        if(typeof item.answer !== 'number' || item.answer < 0 || item.answer >= item.options.length) throw new Error(`Question ${i+1} has invalid "answer" index.`);
+      });
+      jsonStatus.textContent = `✓ ${data.length} question${data.length>1?'s':''} loaded successfully.`;
+      jsonStatus.style.color = 'var(--success)';
+      launchBtn.disabled = false;
+      launchHint.textContent = `Ready — ${data.length} question${data.length>1?'s':''}, ${state.secondsPerQ}s each`;
+      return data;
+    }catch(err){
+      jsonStatus.textContent = `✗ ${err.message}`;
+      jsonStatus.style.color = 'var(--danger)';
+      launchBtn.disabled = true;
+      launchHint.textContent = 'Fix the JSON to continue';
+      return null;
+    }
+  }
+  jsonInput.addEventListener('input', validateJson);
+
+  launchBtn.addEventListener('click', () => {
+    const data = validateJson();
+    if(!data) return;
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 40);
+    }
+    state.questions = data;
+    state.answers = new Array(data.length).fill(null);
+    state.totalSeconds = data.length * state.secondsPerQ;
+    state.remaining = state.totalSeconds;
+    state.submitted = false;
+    startQuiz();
+  });
+
+  /* ---------------- Quiz Screen Logic ---------------- */
+  const quizList = el('quiz-list');
+  const timerText = el('timer-text');
+  const progressFill = el('progress-fill');
+  const answeredCount = el('answered-count');
+  const submitBtn = el('submit-btn');
+
+  function buildQuestionCard(q, idx){
+    const wrap = document.createElement('div');
+    wrap.className = 'card rounded-2xl p-5 sm:p-6';
+    wrap.dataset.qidx = idx;
+
+    const optionsHtml = q.options.map((opt, oi) => `
+      <label class="option-row flex items-center gap-3 rounded-xl px-4 py-3" data-oidx="${oi}">
+        <span class="radio-dot"><span class="radio-dot-fill"></span></span>
+        <span class="text-[15px] leading-snug">${opt}</span>
+      </label>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="flex items-start gap-3 mb-4">
+        <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+        <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5">${q.q}</p>
+      </div>
+      <div class="flex flex-col gap-2.5 mb-3">${optionsHtml}</div>
+      <div class="flex justify-end">
+        <button class="clear-btn text-xs font-mono text-white/30 hover:text-brass transition-colors" style="--tw-text-opacity:1;">Clear selection</button>
+      </div>
+    `;
+    return wrap;
+  }
+
+  function renderQuiz(){
+    quizList.innerHTML = '';
+    state.questions.forEach((q, idx) => {
+      quizList.appendChild(buildQuestionCard(q, idx));
+    });
+    renderMath(quizList);
+    updateAnsweredCount();
+  }
+
+  quizList.addEventListener('click', (e) => {
+    const optRow = e.target.closest('.option-row');
+    const clearBtn = e.target.closest('.clear-btn');
+    const card = e.target.closest('[data-qidx]');
+    if(!card) return;
+    const qidx = parseInt(card.dataset.qidx, 10);
+
+    if(clearBtn){
+      state.answers[qidx] = null;
+      updateOptionVisuals(card, null);
+      updateAnsweredCount();
+      return;
+    }
+    if(optRow){
+      const oidx = parseInt(optRow.dataset.oidx, 10);
+      state.answers[qidx] = oidx;
+      updateOptionVisuals(card, oidx);
+      updateAnsweredCount();
+    }
+  });
+
+  function updateOptionVisuals(card, selectedIdx){
+    card.querySelectorAll('.option-row').forEach(row => {
+      const oi = parseInt(row.dataset.oidx, 10);
+      row.classList.toggle('selected', oi === selectedIdx);
+    });
+  }
+
+  function updateAnsweredCount(){
+    const answered = state.answers.filter(a => a !== null).length;
+    answeredCount.innerHTML = `${answered} <span class="text-white/30 text-base">/ ${state.questions.length}</span>`;
+  }
+
+  function formatTime(totalSec){
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  function startQuiz(){
+    renderQuiz();
+    timerText.textContent = formatTime(state.remaining);
+    timerText.classList.remove('timer-danger');
+    progressFill.style.width = '100%';
+    state.startedAt = Date.now();
+    showScreen('quiz');
+    clearInterval(state.timerId);
+    state.timerId = setInterval(tick, 1000);
+  }
+
+  function tick(){
+    state.remaining -= 1;
+    const pct = Math.max(0, (state.remaining / state.totalSeconds) * 100);
+    progressFill.style.width = pct + '%';
+    timerText.textContent = formatTime(Math.max(0, state.remaining));
+    if(pct <= 15){
+      timerText.classList.add('timer-danger');
+    }
+    if(state.remaining <= 0){
+      clearInterval(state.timerId);
+      finishQuiz(true);
+    }
+  }
+
+  submitBtn.addEventListener('click', () => finishQuiz(false));
+
+  function finishQuiz(auto){
+    if(state.submitted) return;
+    state.submitted = true;
+    clearInterval(state.timerId);
+    state.timeSpent = state.totalSeconds - Math.max(0, state.remaining);
+    renderResults();
+    showScreen('results');
+  }
+
+  /* ---------------- Results Screen Logic ---------------- */
+  const metricsGrid = el('metrics-grid');
+  const reviewList = el('review-list');
+  const filterTabs = el('filter-tabs');
+
+  function computeResults(){
+    let correct = 0, incorrect = 0, skipped = 0;
+    const details = state.questions.map((q, idx) => {
+      const userAns = state.answers[idx];
+      let status;
+      if(userAns === null || userAns === undefined){
+        status = 'skipped'; skipped++;
+      } else if(userAns === q.answer){
+        status = 'correct'; correct++;
+      } else {
+        status = 'incorrect'; incorrect++;
+      }
+      return { q, idx, userAns, status };
+    });
+    const net = (correct * 1) - (incorrect * 0.25);
+    const attempted = correct + incorrect;
+    const accuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
+    return { details, correct, incorrect, skipped, net, accuracy };
+  }
+
+  function metricCard(label, value, colorVar){
+    return `
+      <div class="metric-card px-4 py-4 text-center">
+        <p class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/35 mb-2">${label}</p>
+        <p class="font-display text-2xl sm:text-3xl font-medium" style="${colorVar ? `color:${colorVar}`:''}">${value}</p>
+      </div>
+    `;
+  }
+
+  let lastResults = null;
+
+  function renderResults(){
+    const r = computeResults();
+    lastResults = r;
+
+    metricsGrid.innerHTML = [
+      metricCard('Net Score', r.net.toFixed(2), 'var(--accent-bright)'),
+      metricCard('Correct', r.correct, 'var(--success)'),
+      metricCard('Incorrect', r.incorrect, 'var(--danger)'),
+      metricCard('Skipped', r.skipped, 'var(--text-muted)'),
+      metricCard('Accuracy', r.accuracy.toFixed(1) + '%'),
+      metricCard('Time Spent', formatTime(state.timeSpent)),
+    ].join('');
+
+    state.filter = 'all';
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t.dataset.filter === 'all'));
+    renderReviewList(r);
+  }
+
+  function renderReviewList(r){
+    const filtered = r.details.filter(d => state.filter === 'all' ? true : d.status === state.filter);
+    if(filtered.length === 0){
+      reviewList.innerHTML = `<p class="text-center text-white/30 font-mono text-sm py-10">No questions in this filter.</p>`;
+      return;
+    }
+
+    reviewList.innerHTML = filtered.map(d => {
+      const { q, idx, userAns, status } = d;
+      const badgeClass = status === 'correct' ? 'badge-correct' : status === 'incorrect' ? 'badge-incorrect' : 'badge-skipped';
+      const badgeLabel = status.charAt(0).toUpperCase() + status.slice(1);
+
+      const optionsHtml = q.options.map((opt, oi) => {
+        let cls = 'option-row flex items-center gap-3 rounded-xl px-4 py-3';
+        let dotColor = '';
+        if(oi === q.answer){ cls += ' opt-correct'; dotColor = 'var(--success)'; }
+        else if(oi === userAns && status === 'incorrect'){ cls += ' opt-incorrect'; dotColor = 'var(--danger)'; }
+        const marker = oi === q.answer ? '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--success)">✓ correct</span>'
+          : (oi === userAns ? '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--danger)">your pick</span>' : '');
+        return `<div class="${cls}">
+          <span class="radio-dot" style="${dotColor ? `border-color:${dotColor}`:''}"><span class="radio-dot-fill" style="${dotColor ? `transform:scale(1); background:${dotColor}`:''}"></span></span>
+          <span class="text-[15px] leading-snug">${opt}</span>
+          ${marker}
+        </div>`;
+      }).join('');
+
+      return `
+        <div class="card rounded-2xl p-5 sm:p-6">
+          <div class="flex items-start gap-3 mb-4">
+            <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+            <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5 flex-1">${q.q}</p>
+            <span class="badge ${badgeClass} shrink-0">${badgeLabel}</span>
+          </div>
+          <div class="flex flex-col gap-2.5">${optionsHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    renderMath(reviewList);
+  }
+
+  filterTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-tab');
+    if(!btn || !lastResults) return;
+    state.filter = btn.dataset.filter;
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t === btn));
+    renderReviewList(lastResults);
+  });
+
+  el('restart-btn').addEventListener('click', () => {
+    clearInterval(state.timerId);
+    state.submitted = false;
+    state.answers = [];
+    state.questions = [];
+    showScreen('setup');
+  });
+
+})();
+</script>
 </body>
 </html>
-
-
