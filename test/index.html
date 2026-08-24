@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DU Admission — MCQ Practice</title>
+<!-- [Favicons and Fonts kept from original] -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMWMxOTE0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBhMDkwOCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYiIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNlM2MxNzkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjYzlhMjRiIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0idXJsKCNnKSIvPgogIDxyZWN0IHg9IjEiIHk9IjEiIHdpZHRoPSI2MiIgaGVpZ2h0PSI2MiIgcng9IjE0IiBmaWxsPSJub25lIiBzdHJva2U9IiMyYjI2MjAiIHN0cm9rZS13aWR0aD0iMSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0MyIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsICdUaW1lcyBOZXcgUm9tYW4nLCBzZXJpZiIgZm9udC1zaXplPSIzMCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0idXJsKCNiKSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RDwvdGV4dD4KICA8Y2lyY2xlIGN4PSI0NyIgY3k9IjE5IiByPSIzIiBmaWxsPSIjYzlhMjRiIi8+Cjwvc3ZnPgo=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { DEFAULT: '#0a0908', 50:'#f0eae0' },
+          surface: { DEFAULT: '#15130f', 2: '#1c1914' },
+          hairline: '#2b2620',
+          brass: { DEFAULT: '#c9a24b', bright: '#e3c179', dim: '#8a6f36' },
+          sage: '#5fa87d',
+          rust: '#c1584a',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  :root{
+    --bg:#0a0908; --surface:#15130f; --surface-2:#1c1914;
+    --border:#2b2620; --border-soft:#211d18;
+    --text:#f0eae0; --text-muted:#a39c8c; --text-faint:#6b6459;
+    --accent:#c9a24b; --accent-bright:#e3c179; --accent-dim:#8a6f36;
+    --success:#5fa87d; --danger:#c1584a; --skip:#6b6459;
+  }
+  *{-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,75,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(201,162,75,0.04), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .card{ background:linear-gradient(180deg, var(--surface-2), var(--surface)); border:1px solid var(--border); border-radius:16px; }
+  .mode-card{ transition: all .25s ease; cursor: pointer; }
+  .mode-card:hover{ transform:translateY(-2px); border-color:#3a342a; }
+  .mode-card.active{
+    border-color:var(--accent);
+    background:linear-gradient(180deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+    box-shadow:0 0 0 1px rgba(201,162,75,0.25), 0 10px 30px -12px rgba(201,162,75,0.25);
+  }
+  .btn-primary{
+    background:linear-gradient(180deg, var(--accent-bright), var(--accent));
+    color:#1a1408; font-weight:600; transition: all .25s ease;
+    box-shadow: 0 6px 24px -8px rgba(201,162,75,0.45);
+  }
+  .btn-primary:hover:not(:disabled){ filter:brightness(1.08); transform:translateY(-1px); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-ghost{ border:1px solid var(--border); color:var(--text-muted); transition: all .2s ease; }
+  .btn-ghost:hover{ border-color:var(--accent-dim); color:var(--accent-bright); background:rgba(201,162,75,0.06); }
+  textarea, input[type="number"]{ background:var(--surface); border:1px solid var(--border); color:var(--text); }
+  .option-row{ border:1px solid var(--border); transition: all .2s ease; cursor:pointer; }
+  .option-row.selected{ border-color:var(--accent); background:rgba(201,162,75,0.06); }
+  .progress-fill{ background:linear-gradient(90deg, var(--accent-dim), var(--accent-bright)); transition:width 1s linear; }
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+  .fade-in{ animation: fadeIn .5s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  .divider-brass{ height:1px; background:linear-gradient(90deg, transparent, var(--accent-dim), transparent); }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- ============= SETUP SCREEN ============= -->
+<section id="screen-setup" class="screen active min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in mb-12 text-center">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-4">Dhaka University Prep</p>
+      <h1 class="font-display text-4xl sm:text-6xl font-medium tracking-tight leading-[1.05]">
+        Practice with<br class="sm:hidden"> <span class="italic text-brass-bright" style="color:var(--accent-bright)">precision</span>.
+      </h1>
+      <div id="shared-badge" class="hidden mt-6">
+        <span class="bg-sage/20 text-sage border border-sage/30 px-4 py-1.5 rounded-full text-xs font-mono">✓ Quiz loaded from shared link</span>
+      </div>
+    </div>
+
+    <!-- 01: Intensity Selection -->
+    <div class="fade-in mb-10" style="animation-delay:.08s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">01 — Select Intensity</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mode-grid">
+        <button data-mode="average" data-seconds="45" class="mode-card active card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Average</p>
+          <p class="font-mono text-xs text-white/40">45s / q</p>
+        </button>
+        <button data-mode="fast" data-seconds="30" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Fast</p>
+          <p class="font-mono text-xs text-white/40">30s / q</p>
+        </button>
+        <button data-mode="lightspeed" data-seconds="15" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Lightspeed</p>
+          <p class="font-mono text-xs text-white/40">15s / q</p>
+        </button>
+        <button data-mode="custom" data-seconds="0" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Custom</p>
+          <p class="font-mono text-xs text-white/40">Manual</p>
+        </button>
+      </div>
+      <div id="custom-seconds-wrap" class="hidden mt-4">
+        <input type="number" id="custom-seconds" min="5" max="600" value="40" class="w-full sm:w-48 rounded-xl px-4 py-2.5 font-mono text-sm border border-hairline">
+      </div>
+    </div>
+
+    <!-- 02: Launch / Share -->
+    <div class="fade-in flex flex-col items-center gap-6" style="animation-delay:.14s">
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button id="launch-btn" disabled class="btn-primary rounded-full px-12 py-4 text-lg font-display tracking-wide">
+                Launch Practice
+            </button>
+            <button id="share-link-btn" class="btn-ghost rounded-full px-8 py-4 text-sm font-medium hidden">
+                Copy Share Link
+            </button>
+        </div>
+        <p class="text-xs text-white/30 font-mono" id="launch-hint">Waiting for questions...</p>
+    </div>
+
+    <!-- 03: Data Source (Collapsed) -->
+    <div class="fade-in mt-16 pt-10 border-t border-hairline/50" style="animation-delay:.2s">
+        <details class="group">
+            <summary class="flex items-center justify-center gap-2 cursor-pointer text-white/30 hover:text-white/50 transition-colors list-none">
+                <span class="font-mono text-[10px] tracking-widest uppercase">Developer / Manual Entry</span>
+                <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </summary>
+            
+            <div class="mt-6 card rounded-2xl p-6">
+                <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+                    <p class="text-xs text-white/40 leading-relaxed">Paste your JSON array here. You can also generate a sharable URL from this data.</p>
+                    <button id="load-sample-btn" class="text-xs font-mono text-brass-bright border-b border-brass-bright/30 pb-0.5">Load Samples</button>
+                </div>
+                <textarea id="json-input" rows="6" placeholder="[{...}]" class="w-full rounded-xl px-4 py-3 font-mono text-[12px] resize-y mb-4"></textarea>
+                <div id="json-status" class="text-[11px] font-mono opacity-50">Empty</div>
+            </div>
+        </details>
+    </div>
+
+  </div>
+</section>
+
+<!-- [QUIZ SCREEN AND RESULTS SCREEN REMAIN LARGELY THE SAME AS YOUR ORIGINAL] -->
+<section id="screen-quiz" class="screen min-h-screen pb-32">
+    <div class="fixed top-0 left-0 right-0 z-40 bg-ink/80 backdrop-blur-md border-b border-hairline">
+      <div class="max-w-3xl mx-auto px-5 py-4">
+        <div class="flex items-center justify-between mb-3">
+          <div><p class="font-mono text-[10px] uppercase text-white/35">Time</p><p id="timer-text" class="font-mono text-2xl font-semibold">00:00</p></div>
+          <div class="text-right"><p class="font-mono text-[10px] uppercase text-white/35">Progress</p><p id="answered-count" class="font-mono text-2xl font-semibold text-white/80">0/0</p></div>
+        </div>
+        <div class="bg-surface-2 rounded-full h-1.5 w-full overflow-hidden"><div id="progress-fill" class="progress-fill h-full w-full"></div></div>
+      </div>
+    </div>
+    <div class="max-w-3xl mx-auto px-5 pt-32"><div id="quiz-list" class="flex flex-col gap-5"></div></div>
+    <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40"><button id="submit-btn" class="btn-primary rounded-full px-12 py-4 font-display">Submit Test</button></div>
+</section>
+
+<section id="screen-results" class="screen min-h-screen py-20">
+    <div class="max-w-4xl mx-auto px-5 text-center">
+        <h2 class="font-display text-4xl mb-10">Results</h2>
+        <div id="metrics-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10"></div>
+        <div id="filter-tabs" class="flex justify-center gap-2 mb-8">
+            <button data-filter="all" class="px-4 py-2 rounded-full border border-hairline text-sm active">All</button>
+        </div>
+        <div id="review-list" class="text-left flex flex-col gap-5 mb-14"></div>
+        <button id="restart-btn" class="btn-ghost rounded-full px-10 py-3">Back to Start</button>
+    </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  const state = { mode: 'average', secondsPerQ: 45, questions: [], answers: [], remaining: 0, timerId: null, submitted: false };
+
+  // --- Compression Logic ---
+  async function compressText(text) {
+    const byteArray = new TextEncoder().encode(text);
+    const stream = new Blob([byteArray]).stream().pipeThrough(new CompressionStream('deflate'));
+    const compressedBuffer = await new Response(stream).arrayBuffer();
+    let binary = '';
+    const bytes = new Uint8Array(compressedBuffer);
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // URL Safe
+  }
+
+  async function decompressText(b64) {
+    try {
+        const standardB64 = b64.replace(/-/g, '+').replace(/_/g, '/');
+        const binary = atob(standardB64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+        return await new Response(stream).text();
+    } catch(e) { return null; }
+  }
+
+  // --- Helpers ---
+  const el = (id) => document.getElementById(id);
+  const showScreen = (n) => { 
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    el('screen-' + n).classList.add('active');
+    window.scrollTo(0,0);
+  };
+
+  function renderMath(container){
+    if(window.renderMathInElement) renderMathInElement(container, {
+        delimiters: [{left:"$$", right:"$$", display:true},{left:"$", right:"$", display:false}],
+        throwOnError:false
+    });
+  }
+
+  // --- Core Logic ---
+  function validateJson(){
+    const raw = el('json-input').value.trim();
+    if(!raw) {
+        el('launch-btn').disabled = true;
+        el('share-link-btn').classList.add('hidden');
+        return null;
+    }
+    try {
+        const data = JSON.parse(raw);
+        el('json-status').textContent = `✓ ${data.length} questions ready.`;
+        el('json-status').style.color = 'var(--success)';
+        el('launch-btn').disabled = false;
+        el('share-link-btn').classList.remove('hidden');
+        el('launch-hint').textContent = `Ready: ${data.length} questions detected.`;
+        return data;
+    } catch(e) {
+        el('json-status').textContent = "✗ Invalid JSON format";
+        el('json-status').style.color = 'var(--danger)';
+        el('launch-btn').disabled = true;
+        return null;
+    }
+  }
+
+  // Handle URL Load
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const dataParam = params.get('data');
+    if(dataParam) {
+        const decompressed = await decompressText(dataParam);
+        if(decompressed) {
+            el('json-input').value = decompressed;
+            el('shared-badge').classList.remove('hidden');
+            validateJson();
+        }
+    }
+  });
+
+  el('json-input').addEventListener('input', validateJson);
+
+  el('share-link-btn').addEventListener('click', async () => {
+    const data = el('json-input').value;
+    const comp = await compressText(data);
+    const url = `${window.location.origin}${window.location.pathname}?data=${comp}`;
+    
+    await navigator.clipboard.writeText(url);
+    const oldText = el('share-link-btn').textContent;
+    el('share-link-btn').textContent = "✓ Link Copied!";
+    setTimeout(() => el('share-link-btn').textContent = oldText, 2000);
+  });
+
+  el('mode-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-card');
+    if(!btn) return;
+    [...el('mode-grid').children].forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    state.secondsPerQ = parseInt(btn.dataset.seconds);
+    el('custom-seconds-wrap').classList.toggle('hidden', state.mode !== 'custom');
+  });
+
+  el('launch-btn').addEventListener('click', () => {
+    const data = validateJson();
+    if(!data) return;
+    state.questions = data;
+    state.answers = new Array(data.length).fill(null);
+    if(state.mode === 'custom') state.secondsPerQ = parseInt(el('custom-seconds').value) || 30;
+    state.totalSeconds = data.length * state.secondsPerQ;
+    state.remaining = state.totalSeconds;
+    
+    // Build UI
+    el('quiz-list').innerHTML = data.map((q, i) => `
+        <div class="card p-6" data-qidx="${i}">
+            <p class="mb-4 text-lg font-medium">${q.q}</p>
+            <div class="flex flex-col gap-2">
+                ${q.options.map((o, oi) => `
+                    <label class="option-row p-3 rounded-xl flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="q${i}" value="${oi}" class="hidden">
+                        <span class="w-4 h-4 border border-white/20 rounded-full flex-shrink-0"></span>
+                        <span>${o}</span>
+                    </label>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+    
+    renderMath(el('quiz-list'));
+    el('answered-count').textContent = `0 / ${data.length}`;
+    showScreen('quiz');
+    
+    clearInterval(state.timerId);
+    state.timerId = setInterval(() => {
+        state.remaining--;
+        el('timer-text').textContent = `${Math.floor(state.remaining/60)}:${String(state.remaining%60).padStart(2,'0')}`;
+        el('progress-fill').style.width = `${(state.remaining/state.totalSeconds)*100}%`;
+        if(state.remaining <= 0) finish();
+    }, 1000);
+  });
+
+  el('quiz-list').addEventListener('change', (e) => {
+    const row = e.target.closest('.option-row');
+    const card = e.target.closest('[data-qidx]');
+    const qidx = card.dataset.qidx;
+    [...card.querySelectorAll('.option-row')].forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    state.answers[qidx] = parseInt(e.target.value);
+    el('answered-count').textContent = `${state.answers.filter(a=>a!==null).length} / ${state.questions.length}`;
+  });
+
+  const finish = () => {
+    clearInterval(state.timerId);
+    let correct = 0;
+    state.questions.forEach((q, i) => { if(state.answers[i] === q.answer) correct++; });
+    
+    el('metrics-grid').innerHTML = `
+        <div class="card p-4"><p class="text-xs opacity-40">Score</p><p class="text-2xl">${correct}/${state.questions.length}</p></div>
+        <div class="card p-4"><p class="text-xs opacity-40">Accuracy</p><p class="text-2xl">${Math.round(correct/state.questions.length*100)}%</p></div>
+    `;
+
+    el('review-list').innerHTML = state.questions.map((q, i) => {
+        const userAns = state.answers[i];
+        return `
+            <div class="card p-6">
+                <div class="flex justify-between mb-4">
+                    <p class="font-medium">${q.q}</p>
+                    <span class="text-xs ${userAns === q.answer ? 'text-sage' : 'text-rust'} font-mono">
+                        ${userAns === q.answer ? 'CORRECT' : 'INCORRECT'}
+                    </span>
+                </div>
+                <div class="flex flex-col gap-2">
+                    ${q.options.map((o, oi) => `
+                        <div class="p-3 rounded-xl border ${oi === q.answer ? 'border-sage/50 bg-sage/5' : (oi === userAns ? 'border-rust/50 bg-rust/5' : 'border-hairline')}">
+                            ${o} ${oi === q.answer ? '✓' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    renderMath(el('review-list'));
+    showScreen('results');
+  };
+
+  el('submit-btn').addEventListener('click', finish);
+  el('restart-btn').addEventListener('click', () => showScreen('setup'));
+  el('load-sample-btn').addEventListener('click', () => {
+    el('json-input').value = JSON.stringify([{q:"What is $2+2$?", options:["3","4","5"], answer:1}], null, 2);
+    validateJson();
+  });
+
+})();
+</script>
+</body>
+</html>
