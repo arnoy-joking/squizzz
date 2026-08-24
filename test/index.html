@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DU Admission — MCQ Practice</title>
-<!-- [Favicons and Fonts kept from original] -->
 <link rel="icon" type="image/svg+xml" href="/test/download.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,32 +57,202 @@
     font-family:'Inter',sans-serif;
     min-height:100vh;
   }
-  .card{ background:linear-gradient(180deg, var(--surface-2), var(--surface)); border:1px solid var(--border); border-radius:16px; }
-  .mode-card{ transition: all .25s ease; cursor: pointer; }
+  .font-display{font-family:'Fraunces',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+
+  ::selection{background:rgba(201,162,75,0.35); color:#fff;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#2b2620; border-radius:8px; border:2px solid var(--bg);}
+  ::-webkit-scrollbar-thumb:hover{background:#3a342a;}
+
+  .card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:16px;
+  }
+
+  .mode-card{
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background .25s ease;
+  }
   .mode-card:hover{ transform:translateY(-2px); border-color:#3a342a; }
   .mode-card.active{
     border-color:var(--accent);
     background:linear-gradient(180deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
     box-shadow:0 0 0 1px rgba(201,162,75,0.25), 0 10px 30px -12px rgba(201,162,75,0.25);
   }
+
   .btn-primary{
     background:linear-gradient(180deg, var(--accent-bright), var(--accent));
-    color:#1a1408; font-weight:600; transition: all .25s ease;
+    color:#1a1408;
+    font-weight:600;
+    transition: box-shadow .25s ease, transform .15s ease, filter .25s ease;
     box-shadow: 0 6px 24px -8px rgba(201,162,75,0.45);
   }
-  .btn-primary:hover:not(:disabled){ filter:brightness(1.08); transform:translateY(-1px); }
-  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; }
-  .btn-ghost{ border:1px solid var(--border); color:var(--text-muted); transition: all .2s ease; }
+  .btn-primary:hover:not(:disabled){ filter:brightness(1.08); box-shadow:0 10px 32px -8px rgba(201,162,75,0.6); transform:translateY(-1px); }
+  .btn-primary:active:not(:disabled){ transform:translateY(0px) scale(.99); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
+
+  .btn-ghost{
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    transition: all .2s ease;
+  }
   .btn-ghost:hover{ border-color:var(--accent-dim); color:var(--accent-bright); background:rgba(201,162,75,0.06); }
-  textarea, input[type="number"]{ background:var(--surface); border:1px solid var(--border); color:var(--text); }
-  .option-row{ border:1px solid var(--border); transition: all .2s ease; cursor:pointer; }
-  .option-row.selected{ border-color:var(--accent); background:rgba(201,162,75,0.06); }
-  .progress-fill{ background:linear-gradient(90deg, var(--accent-dim), var(--accent-bright)); transition:width 1s linear; }
-  .screen{ display:none; }
-  .screen.active{ display:block; }
+
+  textarea, input[type="number"]{
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea:focus, input[type="number"]:focus{
+    outline:none; border-color:var(--accent-dim); box-shadow:0 0 0 3px rgba(201,162,75,0.12);
+  }
+
+  .option-row{
+    border:1px solid var(--border);
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+    cursor:pointer;
+  }
+  .option-row:hover{ border-color:#3a342a; background:rgba(255,255,255,0.02); }
+  .option-row.selected{
+    border-color:var(--accent);
+    background:linear-gradient(90deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+  }
+  .radio-dot{
+    width:18px; height:18px; border-radius:50%;
+    border:1.5px solid var(--text-faint);
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color .2s ease;
+    flex-shrink:0;
+  }
+  .option-row.selected .radio-dot{ border-color:var(--accent-bright); }
+  .radio-dot-fill{
+    width:9px; height:9px; border-radius:50%; background:var(--accent-bright);
+    transform:scale(0); transition:transform .18s ease;
+  }
+  .option-row.selected .radio-dot-fill{ transform:scale(1); }
+
+  /* review mode colorings */
+  .opt-correct{ border-color:var(--success) !important; background:linear-gradient(90deg, rgba(95,168,125,0.12), rgba(95,168,125,0.02)) !important; }
+  .opt-incorrect{ border-color:var(--danger) !important; background:linear-gradient(90deg, rgba(193,88,74,0.12), rgba(193,88,74,0.02)) !important; }
+
+  .progress-track{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-fill{
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent-bright));
+    transition:width 1s linear;
+  }
+  .progress-ticks{
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(0,0,0,0.35) 23px, rgba(0,0,0,0.35) 24px);
+    pointer-events:none;
+  }
+
+  .timer-text{ transition: color .3s ease; }
+  .timer-danger{ color:var(--danger) !important; animation: pulse-red 1.4s ease-in-out infinite; }
+  @keyframes pulse-red{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+
   .fade-in{ animation: fadeIn .5s ease both; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
-  .divider-brass{ height:1px; background:linear-gradient(90deg, transparent, var(--accent-dim), transparent); }
+
+  .stagger > *{ animation: fadeIn .45s ease both; }
+
+  .badge{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em;
+    padding:3px 10px; border-radius:999px; font-weight:600;
+  }
+  .badge-correct{ background:rgba(95,168,125,0.14); color:var(--success); border:1px solid rgba(95,168,125,0.35); }
+  .badge-incorrect{ background:rgba(193,88,74,0.14); color:var(--danger); border:1px solid rgba(193,88,74,0.35); }
+  .badge-skipped{ background:rgba(163,156,140,0.12); color:var(--text-muted); border:1px solid var(--border); }
+
+  .filter-tab{
+    transition:all .2s ease; border:1px solid var(--border); color:var(--text-muted);
+  }
+  .filter-tab.active{
+    border-color:var(--accent); color:var(--accent-bright); background:rgba(201,162,75,0.08);
+  }
+
+  .qnum{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--accent-bright);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+  }
+
+  .metric-card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:14px;
+  }
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, textarea:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent-bright); outline-offset:2px;
+  }
+
+  .katex{ font-size:1.05em; }
+  .katex-display{ margin:0.6em 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  .fixed-topbar{
+    background:rgba(10,9,8,0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+
+  .float-submit{
+    box-shadow:0 12px 40px -10px rgba(201,162,75,0.5);
+  }
+
+  .divider-brass{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  }
+
+  .collapse-wrapper{
+    display:grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows .4s cubic-bezier(.4,0,.2,1);
+  }
+  .collapse-wrapper.collapsed{
+    grid-template-rows: 0fr;
+  }
+  .collapse-inner{
+    overflow:hidden;
+    min-height:0;
+  }
+
+  #toast{
+    position:fixed;
+    left:50%; bottom:28px;
+    transform:translateX(-50%) translateY(16px);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    box-shadow:0 16px 44px -12px rgba(0,0,0,0.65);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease;
+    z-index:100;
+    max-width:90vw;
+    text-align:center;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #toast.toast-error{ border-color:var(--danger); color:var(--danger); }
 </style>
 </head>
 <body class="antialiased">
@@ -92,17 +261,17 @@
 <section id="screen-setup" class="screen active min-h-screen">
   <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
 
-    <div class="fade-in mb-12 text-center">
-      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-4">Dhaka University Prep</p>
+    <div class="fade-in mb-12 sm:mb-16 text-center">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-4">ঢাকা বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি</p>
       <h1 class="font-display text-4xl sm:text-6xl font-medium tracking-tight leading-[1.05]">
         Practice with<br class="sm:hidden"> <span class="italic text-brass-bright" style="color:var(--accent-bright)">precision</span>.
       </h1>
-      <div id="shared-badge" class="hidden mt-6">
-        <span class="bg-sage/20 text-sage border border-sage/30 px-4 py-1.5 rounded-full text-xs font-mono">✓ Quiz loaded from shared link</span>
-      </div>
+      <p class="text-[15px] sm:text-base text-white/50 mt-5 max-w-md mx-auto leading-relaxed">
+        A focused MCQ rehearsal room for Dhaka University admission — timed, distraction-free, and built for the exact way you'll be tested.
+      </p>
     </div>
 
-    <!-- 01: Intensity Selection -->
+    <!-- Mode selection -->
     <div class="fade-in mb-10" style="animation-delay:.08s">
       <div class="flex items-center gap-3 mb-4">
         <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">01 — Select Intensity</span>
@@ -111,280 +280,684 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mode-grid">
         <button data-mode="average" data-seconds="45" class="mode-card active card rounded-2xl px-4 py-5 text-left">
           <p class="font-display text-lg mb-1">Average</p>
-          <p class="font-mono text-xs text-white/40">45s / q</p>
+          <p class="font-mono text-xs text-white/40">45s / question</p>
         </button>
         <button data-mode="fast" data-seconds="30" class="mode-card card rounded-2xl px-4 py-5 text-left">
           <p class="font-display text-lg mb-1">Fast</p>
-          <p class="font-mono text-xs text-white/40">30s / q</p>
+          <p class="font-mono text-xs text-white/40">30s / question</p>
         </button>
         <button data-mode="lightspeed" data-seconds="15" class="mode-card card rounded-2xl px-4 py-5 text-left">
           <p class="font-display text-lg mb-1">Lightspeed</p>
-          <p class="font-mono text-xs text-white/40">15s / q</p>
+          <p class="font-mono text-xs text-white/40">15s / question</p>
         </button>
         <button data-mode="custom" data-seconds="0" class="mode-card card rounded-2xl px-4 py-5 text-left">
           <p class="font-display text-lg mb-1">Custom</p>
-          <p class="font-mono text-xs text-white/40">Manual</p>
+          <p class="font-mono text-xs text-white/40">your own pace</p>
         </button>
       </div>
       <div id="custom-seconds-wrap" class="hidden mt-4">
-        <input type="number" id="custom-seconds" min="5" max="600" value="40" class="w-full sm:w-48 rounded-xl px-4 py-2.5 font-mono text-sm border border-hairline">
+        <label class="text-xs text-white/40 font-mono uppercase tracking-wider block mb-2">Seconds per question</label>
+        <input type="number" id="custom-seconds" min="5" max="600" value="40" class="w-full sm:w-48 rounded-xl px-4 py-2.5 font-mono text-sm">
       </div>
     </div>
 
-    <!-- 02: Launch / Share -->
-    <div class="fade-in flex flex-col items-center gap-6" style="animation-delay:.14s">
-        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button id="launch-btn" disabled class="btn-primary rounded-full px-12 py-4 text-lg font-display tracking-wide">
-                Launch Practice
-            </button>
-            <button id="share-link-btn" class="btn-ghost rounded-full px-8 py-4 text-sm font-medium hidden">
-                Copy Share Link
-            </button>
+    <!-- JSON input -->
+    <div class="fade-in mb-10" style="animation-delay:.14s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">02 — Load Questions</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+
+      <div class="card rounded-2xl p-5 sm:p-6">
+
+        <div id="shared-banner" class="items-center gap-3 rounded-xl px-4 py-3 mb-4" style="display:none; border:1px solid var(--accent-dim); background:rgba(201,162,75,0.08);">
+          <span class="text-lg leading-none">🔗</span>
+          <p class="text-sm text-white/75 flex-1">Shared quiz loaded — <span id="shared-count" class="text-brass font-semibold">0</span> questions ready. Pick a mode above to begin.</p>
         </div>
-        <p class="text-xs text-white/30 font-mono" id="launch-hint">Waiting for questions...</p>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <button id="toggle-json-btn" type="button" class="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-white/45 hover:text-brass transition-colors">
+            <span id="toggle-json-chevron" class="inline-block transition-transform duration-300" style="transform:rotate(-90deg)">▾</span>
+            <span id="toggle-json-label">Show JSON editor</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button id="copy-link-btn" disabled class="btn-ghost rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap disabled:opacity-30 disabled:cursor-not-allowed">
+              🔗 Copy shareable link
+            </button>
+            <button id="load-sample-btn" class="btn-ghost rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap">
+              Load sample
+            </button>
+          </div>
+        </div>
+
+        <div id="json-collapse" class="collapse-wrapper collapsed mt-4">
+          <div class="collapse-inner">
+            <div class="text-xs text-white/45 leading-relaxed max-w-xl mb-3">
+              <p class="text-white/70 font-medium mb-1.5">Expected JSON array format</p>
+              <pre class="font-mono text-[11px] text-white/40 bg-black/30 rounded-lg p-3 overflow-x-auto leading-relaxed border border-white/5">[{
+  "q": "What is the unit of force in $F = ma$?",
+  "options": ["$\\text{N}$", "$\\text{J}$", "$\\ce{H2O}$", "$\\text{W}$"],
+  "answer": 0
+}]</pre>
+              <p class="mt-2 text-white/35">Use <span class="text-brass">$...$</span> for inline math/physics and <span class="text-brass">\ce{...}</span> for chemistry — rendered via KaTeX + mhchem. <span class="font-mono text-white/50">answer</span> is the 0-indexed correct option. Once loaded, use <span class="text-brass">Copy shareable link</span> to send this exact question set to anyone — it travels compressed inside the URL itself, no server or database involved.</p>
+            </div>
+
+            <textarea id="json-input" rows="10" placeholder="Paste your JSON array of questions here…" class="w-full rounded-xl px-4 py-3.5 font-mono text-[13px] leading-relaxed resize-y"></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
+          <p id="json-status" class="text-xs font-mono text-white/30">No questions loaded yet.</p>
+        </div>
+      </div>
     </div>
 
-    <!-- 03: Data Source (Collapsed) -->
-    <div class="fade-in mt-16 pt-10 border-t border-hairline/50" style="animation-delay:.2s">
-        <details class="group">
-            <summary class="flex items-center justify-center gap-2 cursor-pointer text-white/30 hover:text-white/50 transition-colors list-none">
-                <span class="font-mono text-[10px] tracking-widest uppercase">Developer / Manual Entry</span>
-                <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </summary>
-            
-            <div class="mt-6 card rounded-2xl p-6">
-                <div class="flex flex-col sm:flex-row justify-between gap-4 mb-4">
-                    <p class="text-xs text-white/40 leading-relaxed">Paste your JSON array here. You can also generate a sharable URL from this data.</p>
-                    <button id="load-sample-btn" class="text-xs font-mono text-brass-bright border-b border-brass-bright/30 pb-0.5">Load Samples</button>
-                </div>
-                <textarea id="json-input" rows="6" placeholder="[{...}]" class="w-full rounded-xl px-4 py-3 font-mono text-[12px] resize-y mb-4"></textarea>
-                <div id="json-status" class="text-[11px] font-mono opacity-50">Empty</div>
-            </div>
-        </details>
+    <!-- Launch -->
+    <div class="fade-in flex flex-col items-center gap-3" style="animation-delay:.2s">
+      <button id="launch-btn" disabled class="btn-primary rounded-full px-10 py-4 text-base font-display tracking-wide">
+        Launch Practice
+      </button>
+      <p class="text-xs text-white/30 font-mono" id="launch-hint">Load valid questions to continue</p>
     </div>
 
   </div>
 </section>
 
-<!-- [QUIZ SCREEN AND RESULTS SCREEN REMAIN LARGELY THE SAME AS YOUR ORIGINAL] -->
+<!-- ============= QUIZ SCREEN ============= -->
 <section id="screen-quiz" class="screen min-h-screen pb-32">
-    <div class="fixed top-0 left-0 right-0 z-40 bg-ink/80 backdrop-blur-md border-b border-hairline">
-      <div class="max-w-3xl mx-auto px-5 py-4">
-        <div class="flex items-center justify-between mb-3">
-          <div><p class="font-mono text-[10px] uppercase text-white/35">Time</p><p id="timer-text" class="font-mono text-2xl font-semibold">00:00</p></div>
-          <div class="text-right"><p class="font-mono text-[10px] uppercase text-white/35">Progress</p><p id="answered-count" class="font-mono text-2xl font-semibold text-white/80">0/0</p></div>
+  <div class="fixed-topbar fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Time remaining</p>
+          <p id="timer-text" class="timer-text font-mono text-2xl font-semibold leading-none mt-0.5">00:00</p>
         </div>
-        <div class="bg-surface-2 rounded-full h-1.5 w-full overflow-hidden"><div id="progress-fill" class="progress-fill h-full w-full"></div></div>
+        <div class="text-right">
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Answered</p>
+          <p id="answered-count" class="font-mono text-2xl font-semibold leading-none mt-0.5 text-white/80">0 <span class="text-white/30 text-base">/ 0</span></p>
+        </div>
+      </div>
+      <div class="progress-track rounded-full h-2 w-full">
+        <div id="progress-fill" class="progress-fill h-full rounded-full relative" style="width:100%">
+          <div class="progress-ticks"></div>
+        </div>
       </div>
     </div>
-    <div class="max-w-3xl mx-auto px-5 pt-32"><div id="quiz-list" class="flex flex-col gap-5"></div></div>
-    <div class="fixed bottom-8 left-0 right-0 flex justify-center z-40"><button id="submit-btn" class="btn-primary rounded-full px-12 py-4 font-display">Submit Test</button></div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 pt-32 sm:pt-28">
+    <div id="quiz-list" class="stagger flex flex-col gap-5"></div>
+  </div>
+
+  <div class="fixed bottom-6 sm:bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
+    <button id="submit-btn" class="float-submit btn-primary pointer-events-auto rounded-full px-9 py-4 font-display text-base tracking-wide">
+      Submit Test
+    </button>
+  </div>
 </section>
 
-<section id="screen-results" class="screen min-h-screen py-20">
-    <div class="max-w-4xl mx-auto px-5 text-center">
-        <h2 class="font-display text-4xl mb-10">Results</h2>
-        <div id="metrics-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-10"></div>
-        <div id="filter-tabs" class="flex justify-center gap-2 mb-8">
-            <button data-filter="all" class="px-4 py-2 rounded-full border border-hairline text-sm active">All</button>
-        </div>
-        <div id="review-list" class="text-left flex flex-col gap-5 mb-14"></div>
-        <button id="restart-btn" class="btn-ghost rounded-full px-10 py-3">Back to Start</button>
+<!-- ============= RESULTS SCREEN ============= -->
+<section id="screen-results" class="screen min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in text-center mb-10">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-3" style="color:var(--accent)">Evaluation</p>
+      <h2 class="font-display text-3xl sm:text-5xl font-medium tracking-tight">Your results</h2>
     </div>
+
+    <!-- Metrics -->
+    <div class="fade-in grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10" id="metrics-grid" style="animation-delay:.06s"></div>
+
+    <!-- Filters -->
+    <div class="fade-in flex items-center gap-2 mb-6 flex-wrap" id="filter-tabs" style="animation-delay:.1s">
+      <button data-filter="all" class="filter-tab active rounded-full px-4 py-2 text-sm font-medium">All</button>
+      <button data-filter="correct" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Correct</button>
+      <button data-filter="incorrect" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Incorrect</button>
+      <button data-filter="skipped" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Skipped</button>
+    </div>
+
+    <div id="review-list" class="stagger flex flex-col gap-5 mb-14"></div>
+
+    <div class="fade-in flex justify-center">
+      <button id="restart-btn" class="btn-ghost rounded-full px-8 py-3.5 text-sm font-medium">
+        ← Start a new practice
+      </button>
+    </div>
+  </div>
 </section>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
   "use strict";
 
-  const state = { mode: 'average', secondsPerQ: 45, questions: [], answers: [], remaining: 0, timerId: null, submitted: false };
+  /* ---------------- Sample Data ---------------- */
+  const sampleQuestions = [
+    { q: "Differentiate: $\\dfrac{d}{dx}\\left(x^3 - 4x^2 + 2x\\right)$ equals?", options: ["$3x^2 - 8x + 2$", "$3x^2 - 4x + 2$", "$x^2 - 8x + 2$", "$3x^3 - 8x + 2$"], answer: 0 },
+    { q: "Evaluate: $\\displaystyle\\int_0^{\\pi} \\sin x \\, dx$", options: ["$0$", "$1$", "$2$", "$\\pi$"], answer: 2 },
+    { q: "If $\\log_2 x = 5$, what is the value of $x$?", options: ["$10$", "$25$", "$32$", "$16$"], answer: 2 },
+    { q: "The roots of $x^2 - 5x + 6 = 0$ are:", options: ["$1, 6$", "$2, 3$", "$-2, -3$", "$2, -3$"], answer: 1 },
+    { q: "A force $F = ma$ acts on a body of mass $2\\text{ kg}$ producing acceleration $3\\text{ m/s}^2$. Find $F$.", options: ["$5\\text{ N}$", "$6\\text{ N}$", "$1.5\\text{ N}$", "$9\\text{ N}$"], answer: 1 },
+    { q: "The SI unit of electric resistance is:", options: ["$\\text{Ampere}$", "$\\text{Volt}$", "$\\Omega \\;(\\text{Ohm})$", "$\\text{Farad}$"], answer: 2 },
+    { q: "Using $v = u + at$, find $v$ when $u = 0$, $a = 10\\text{ m/s}^2$, $t = 5\\text{ s}$.", options: ["$25\\text{ m/s}$", "$50\\text{ m/s}$", "$10\\text{ m/s}$", "$5\\text{ m/s}$"], answer: 1 },
+    { q: "Kinetic energy is given by $KE = \\dfrac{1}{2}mv^2$. If $m = 4\\text{ kg}$ and $v = 3\\text{ m/s}$, find $KE$.", options: ["$12\\text{ J}$", "$18\\text{ J}$", "$36\\text{ J}$", "$9\\text{ J}$"], answer: 1 },
+    { q: "Balance the equation: $\\ce{N2 + H2 -> NH3}$. What is the coefficient of $\\ce{H2}$?", options: ["$1$", "$2$", "$3$", "$4$"], answer: 2 },
+    { q: "What is produced when $\\ce{CaCO3}$ is heated strongly?", options: ["$\\ce{CaO + CO2}$", "$\\ce{Ca + O2}$", "$\\ce{CaC2 + O2}$", "$\\ce{Ca(OH)2}$"], answer: 0 },
+    { q: "The pH of a neutral aqueous solution at $25^{\\circ}\\text{C}$ is:", options: ["$0$", "$7$", "$14$", "$1$"], answer: 1 },
+    { q: "In $\\ce{2H2 + O2 -> 2H2O}$, how many moles of water form from $4$ moles of $\\ce{H2}$?", options: ["$2$", "$4$", "$1$", "$8$"], answer: 1 },
+  ];
 
-  // --- Compression Logic ---
-  async function compressText(text) {
-    const byteArray = new TextEncoder().encode(text);
-    const stream = new Blob([byteArray]).stream().pipeThrough(new CompressionStream('deflate'));
-    const compressedBuffer = await new Response(stream).arrayBuffer();
-    let binary = '';
-    const bytes = new Uint8Array(compressedBuffer);
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // URL Safe
-  }
-
-  async function decompressText(b64) {
-    try {
-        const standardB64 = b64.replace(/-/g, '+').replace(/_/g, '/');
-        const binary = atob(standardB64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
-        return await new Response(stream).text();
-    } catch(e) { return null; }
-  }
-
-  // --- Helpers ---
-  const el = (id) => document.getElementById(id);
-  const showScreen = (n) => { 
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    el('screen-' + n).classList.add('active');
-    window.scrollTo(0,0);
+  /* ---------------- State ---------------- */
+  const state = {
+    mode: 'average',
+    secondsPerQ: 45,
+    questions: [],
+    answers: [],       // index or null per question
+    totalSeconds: 0,
+    remaining: 0,
+    timerId: null,
+    submitted: false,
+    startedAt: null,
+    filter: 'all',
   };
 
+  /* ---------------- Elements ---------------- */
+  const el = (id) => document.getElementById(id);
+  const screens = {
+    setup: el('screen-setup'),
+    quiz: el('screen-quiz'),
+    results: el('screen-results'),
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+
+  /* ---------------- KaTeX render helper ---------------- */
   function renderMath(container){
-    if(window.renderMathInElement) renderMathInElement(container, {
-        delimiters: [{left:"$$", right:"$$", display:true},{left:"$", right:"$", display:false}],
-        throwOnError:false
+    if(window.renderMathInElement){
+      renderMathInElement(container, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false},
+        ],
+        throwOnError:false,
+      });
+    }
+  }
+
+  /* ---------------- Toast ---------------- */
+  const toastEl = el('toast');
+  let toastTimer = null;
+  function toast(msg, isError){
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('toast-error', !!isError);
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3600);
+  }
+
+  /* ---------------- Share-link compression ----------------
+     Questions are re-encoded into a compact positional array
+     (dropping the repeated "q"/"options"/"answer" key names),
+     minified, deflate-compressed, and base64url-encoded — all
+     stored entirely in the URL hash (#quiz=...). The hash is never
+     sent to the server, so this works on any static host (Vercel,
+     GitHub Pages, etc.) with zero backend and zero storage. */
+  const SUPPORTS_COMPRESSION = ('CompressionStream' in window) && ('DecompressionStream' in window);
+
+  function bytesToBase64Url(bytes){
+    let binary = '';
+    for(let i=0; i<bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function base64UrlToBytes(b64url){
+    let b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
+    while(b64.length % 4) b64 += '=';
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+  // [q, options[], answer] instead of {q, options, answer} — cuts the repeated
+  // key names out of the payload entirely, shrinking it before compression even runs.
+  function toCompactForm(data){
+    return data.map(item => [item.q, item.options, item.answer]);
+  }
+  function fromCompactForm(compact){
+    if(!Array.isArray(compact)) throw new Error('Malformed shared data.');
+    return compact.map((item, i) => {
+      if(!Array.isArray(item) || item.length < 3) throw new Error(`Malformed question ${i+1} in shared data.`);
+      return { q: item[0], options: item[1], answer: item[2] };
+    });
+  }
+  // 'Z' prefix = compact form, deflate-raw compressed. 'P' prefix = compact form,
+  // uncompressed (fallback for browsers without CompressionStream support).
+  async function compressToParam(data){
+    const str = JSON.stringify(toCompactForm(data));
+    const raw = new TextEncoder().encode(str);
+    if(SUPPORTS_COMPRESSION){
+      const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+      const buf = await new Response(stream).arrayBuffer();
+      return 'Z' + bytesToBase64Url(new Uint8Array(buf));
+    }
+    return 'P' + bytesToBase64Url(raw);
+  }
+  async function decompressFromParam(param){
+    const flag = param.charAt(0);
+    const bytes = base64UrlToBytes(param.slice(1));
+    let jsonStr;
+    if(flag === 'Z'){
+      if(!SUPPORTS_COMPRESSION) throw new Error('This browser can\'t open compressed links — please update it.');
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      jsonStr = await new Response(stream).text();
+    } else if(flag === 'P'){
+      jsonStr = new TextDecoder().decode(bytes);
+    } else {
+      throw new Error('Unrecognized share-link format.');
+    }
+    return fromCompactForm(JSON.parse(jsonStr));
+  }
+  async function buildShareUrl(data){
+    const param = await compressToParam(data);
+    const url = new URL(window.location.href);
+    url.hash = 'quiz=' + param;
+    return url.toString();
+  }
+  async function copyToClipboard(text){
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  }
+  function formatByteLen(n){
+    return n < 1024 ? `${n} chars` : `${(n/1024).toFixed(1)}KB`;
+  }
+
+
+  /* ---------------- Setup Screen Logic ---------------- */
+  const modeGrid = el('mode-grid');
+  const customWrap = el('custom-seconds-wrap');
+  const customSecondsInput = el('custom-seconds');
+
+  modeGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-card');
+    if(!btn) return;
+    [...modeGrid.children].forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    if(state.mode === 'custom'){
+      customWrap.classList.remove('hidden');
+      state.secondsPerQ = parseInt(customSecondsInput.value, 10) || 40;
+    } else {
+      customWrap.classList.add('hidden');
+      state.secondsPerQ = parseInt(btn.dataset.seconds, 10);
+    }
+  });
+  customSecondsInput.addEventListener('input', () => {
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 5);
+    }
+  });
+
+  const jsonInput = el('json-input');
+  const jsonStatus = el('json-status');
+  const launchBtn = el('launch-btn');
+  const launchHint = el('launch-hint');
+  const copyLinkBtn = el('copy-link-btn');
+  const sharedBanner = el('shared-banner');
+  const sharedCount = el('shared-count');
+  const jsonCollapse = el('json-collapse');
+  const toggleJsonBtn = el('toggle-json-btn');
+  const toggleJsonChevron = el('toggle-json-chevron');
+  const toggleJsonLabel = el('toggle-json-label');
+
+  function setJsonCollapsed(collapsed){
+    jsonCollapse.classList.toggle('collapsed', collapsed);
+    toggleJsonChevron.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleJsonLabel.textContent = collapsed ? 'Show JSON editor' : 'Hide JSON editor';
+  }
+  toggleJsonBtn.addEventListener('click', () => {
+    setJsonCollapsed(!jsonCollapse.classList.contains('collapsed'));
+  });
+
+  el('load-sample-btn').addEventListener('click', () => {
+    jsonInput.value = JSON.stringify(sampleQuestions, null, 2);
+    sharedBanner.style.display = 'none';
+    setJsonCollapsed(false);
+    validateJson();
+  });
+
+  // A genuine keystroke means the person is editing by hand — the "shared quiz" framing no longer applies.
+  jsonInput.addEventListener('input', () => { sharedBanner.style.display = 'none'; });
+
+  function validateJson(){
+    const raw = jsonInput.value.trim();
+    if(!raw){
+      jsonStatus.textContent = 'No questions loaded yet.';
+      jsonStatus.style.color = '';
+      launchBtn.disabled = true;
+      copyLinkBtn.disabled = true;
+      launchHint.textContent = 'Load valid questions to continue';
+      return null;
+    }
+    try{
+      const data = JSON.parse(raw);
+      if(!Array.isArray(data) || data.length === 0) throw new Error('Must be a non-empty array.');
+      data.forEach((item, i) => {
+        if(typeof item.q !== 'string') throw new Error(`Question ${i+1} missing "q" string.`);
+        if(!Array.isArray(item.options) || item.options.length < 2) throw new Error(`Question ${i+1} needs an "options" array.`);
+        if(typeof item.answer !== 'number' || item.answer < 0 || item.answer >= item.options.length) throw new Error(`Question ${i+1} has invalid "answer" index.`);
+      });
+      jsonStatus.textContent = `✓ ${data.length} question${data.length>1?'s':''} loaded successfully.`;
+      jsonStatus.style.color = 'var(--success)';
+      launchBtn.disabled = false;
+      copyLinkBtn.disabled = false;
+      launchHint.textContent = `Ready — ${data.length} question${data.length>1?'s':''}, ${state.secondsPerQ}s each`;
+      return data;
+    }catch(err){
+      jsonStatus.textContent = `✗ ${err.message}`;
+      jsonStatus.style.color = 'var(--danger)';
+      launchBtn.disabled = true;
+      copyLinkBtn.disabled = true;
+      launchHint.textContent = 'Fix the JSON to continue';
+      return null;
+    }
+  }
+  jsonInput.addEventListener('input', validateJson);
+
+  copyLinkBtn.addEventListener('click', async () => {
+    const data = validateJson();
+    if(!data) return;
+    const original = copyLinkBtn.textContent;
+    copyLinkBtn.disabled = true;
+    copyLinkBtn.textContent = 'Compressing…';
+    try{
+      const url = await buildShareUrl(data);
+      await copyToClipboard(url);
+      toast(`Link copied — ${formatByteLen(url.length)} for ${data.length} question${data.length>1?'s':''}`);
+    }catch(err){
+      toast('Could not build a share link in this browser.', true);
+    }finally{
+      copyLinkBtn.disabled = false;
+      copyLinkBtn.textContent = original;
+    }
+  });
+
+  /* ---------------- Load quiz from a shared link (#quiz=...) ---------------- */
+  async function initFromShareLink(){
+    const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    if(!rawHash) return;
+    const params = new URLSearchParams(rawHash);
+    const param = params.get('quiz');
+    if(!param) return;
+    try{
+      const parsed = await decompressFromParam(param);
+      jsonInput.value = JSON.stringify(parsed, null, 2);
+      const validated = validateJson();
+      if(validated){
+        sharedCount.textContent = validated.length;
+        sharedBanner.style.display = 'flex';
+        setJsonCollapsed(true);
+        toast(`Shared quiz loaded — ${validated.length} questions. Pick a mode to begin.`);
+      } else {
+        toast('The shared link loaded, but its questions look malformed.', true);
+      }
+    }catch(err){
+      toast('This shared link looks corrupted or unsupported.', true);
+    }
+  }
+  initFromShareLink();
+
+  launchBtn.addEventListener('click', () => {
+    const data = validateJson();
+    if(!data) return;
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 40);
+    }
+    state.questions = data;
+    state.answers = new Array(data.length).fill(null);
+    state.totalSeconds = data.length * state.secondsPerQ;
+    state.remaining = state.totalSeconds;
+    state.submitted = false;
+    startQuiz();
+  });
+
+  /* ---------------- Quiz Screen Logic ---------------- */
+  const quizList = el('quiz-list');
+  const timerText = el('timer-text');
+  const progressFill = el('progress-fill');
+  const answeredCount = el('answered-count');
+  const submitBtn = el('submit-btn');
+
+  function buildQuestionCard(q, idx){
+    const wrap = document.createElement('div');
+    wrap.className = 'card rounded-2xl p-5 sm:p-6';
+    wrap.dataset.qidx = idx;
+
+    const optionsHtml = q.options.map((opt, oi) => `
+      <label class="option-row flex items-center gap-3 rounded-xl px-4 py-3" data-oidx="${oi}">
+        <span class="radio-dot"><span class="radio-dot-fill"></span></span>
+        <span class="text-[15px] leading-snug">${opt}</span>
+      </label>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="flex items-start gap-3 mb-4">
+        <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+        <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5">${q.q}</p>
+      </div>
+      <div class="flex flex-col gap-2.5 mb-3">${optionsHtml}</div>
+      <div class="flex justify-end">
+        <button class="clear-btn text-xs font-mono text-white/30 hover:text-brass transition-colors" style="--tw-text-opacity:1;">Clear selection</button>
+      </div>
+    `;
+    return wrap;
+  }
+
+  function renderQuiz(){
+    quizList.innerHTML = '';
+    state.questions.forEach((q, idx) => {
+      quizList.appendChild(buildQuestionCard(q, idx));
+    });
+    renderMath(quizList);
+    updateAnsweredCount();
+  }
+
+  quizList.addEventListener('click', (e) => {
+    const optRow = e.target.closest('.option-row');
+    const clearBtn = e.target.closest('.clear-btn');
+    const card = e.target.closest('[data-qidx]');
+    if(!card) return;
+    const qidx = parseInt(card.dataset.qidx, 10);
+
+    if(clearBtn){
+      state.answers[qidx] = null;
+      updateOptionVisuals(card, null);
+      updateAnsweredCount();
+      return;
+    }
+    if(optRow){
+      const oidx = parseInt(optRow.dataset.oidx, 10);
+      state.answers[qidx] = oidx;
+      updateOptionVisuals(card, oidx);
+      updateAnsweredCount();
+    }
+  });
+
+  function updateOptionVisuals(card, selectedIdx){
+    card.querySelectorAll('.option-row').forEach(row => {
+      const oi = parseInt(row.dataset.oidx, 10);
+      row.classList.toggle('selected', oi === selectedIdx);
     });
   }
 
-  // --- Core Logic ---
-  function validateJson(){
-    const raw = el('json-input').value.trim();
-    if(!raw) {
-        el('launch-btn').disabled = true;
-        el('share-link-btn').classList.add('hidden');
-        return null;
+  function updateAnsweredCount(){
+    const answered = state.answers.filter(a => a !== null).length;
+    answeredCount.innerHTML = `${answered} <span class="text-white/30 text-base">/ ${state.questions.length}</span>`;
+  }
+
+  function formatTime(totalSec){
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  function startQuiz(){
+    renderQuiz();
+    timerText.textContent = formatTime(state.remaining);
+    timerText.classList.remove('timer-danger');
+    progressFill.style.width = '100%';
+    state.startedAt = Date.now();
+    showScreen('quiz');
+    clearInterval(state.timerId);
+    state.timerId = setInterval(tick, 1000);
+  }
+
+  function tick(){
+    state.remaining -= 1;
+    const pct = Math.max(0, (state.remaining / state.totalSeconds) * 100);
+    progressFill.style.width = pct + '%';
+    timerText.textContent = formatTime(Math.max(0, state.remaining));
+    if(pct <= 15){
+      timerText.classList.add('timer-danger');
     }
-    try {
-        const data = JSON.parse(raw);
-        el('json-status').textContent = `✓ ${data.length} questions ready.`;
-        el('json-status').style.color = 'var(--success)';
-        el('launch-btn').disabled = false;
-        el('share-link-btn').classList.remove('hidden');
-        el('launch-hint').textContent = `Ready: ${data.length} questions detected.`;
-        return data;
-    } catch(e) {
-        el('json-status').textContent = "✗ Invalid JSON format";
-        el('json-status').style.color = 'var(--danger)';
-        el('launch-btn').disabled = true;
-        return null;
+    if(state.remaining <= 0){
+      clearInterval(state.timerId);
+      finishQuiz(true);
     }
   }
 
-  // Handle URL Load
-  window.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const dataParam = params.get('data');
-    if(dataParam) {
-        const decompressed = await decompressText(dataParam);
-        if(decompressed) {
-            el('json-input').value = decompressed;
-            el('shared-badge').classList.remove('hidden');
-            validateJson();
-        }
-    }
-  });
+  submitBtn.addEventListener('click', () => finishQuiz(false));
 
-  el('json-input').addEventListener('input', validateJson);
-
-  el('share-link-btn').addEventListener('click', async () => {
-    const data = el('json-input').value;
-    const comp = await compressText(data);
-    const url = `${window.location.origin}${window.location.pathname}?data=${comp}`;
-    
-    await navigator.clipboard.writeText(url);
-    const oldText = el('share-link-btn').textContent;
-    el('share-link-btn').textContent = "✓ Link Copied!";
-    setTimeout(() => el('share-link-btn').textContent = oldText, 2000);
-  });
-
-  el('mode-grid').addEventListener('click', (e) => {
-    const btn = e.target.closest('.mode-card');
-    if(!btn) return;
-    [...el('mode-grid').children].forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    state.mode = btn.dataset.mode;
-    state.secondsPerQ = parseInt(btn.dataset.seconds);
-    el('custom-seconds-wrap').classList.toggle('hidden', state.mode !== 'custom');
-  });
-
-  el('launch-btn').addEventListener('click', () => {
-    const data = validateJson();
-    if(!data) return;
-    state.questions = data;
-    state.answers = new Array(data.length).fill(null);
-    if(state.mode === 'custom') state.secondsPerQ = parseInt(el('custom-seconds').value) || 30;
-    state.totalSeconds = data.length * state.secondsPerQ;
-    state.remaining = state.totalSeconds;
-    
-    // Build UI
-    el('quiz-list').innerHTML = data.map((q, i) => `
-        <div class="card p-6" data-qidx="${i}">
-            <p class="mb-4 text-lg font-medium">${q.q}</p>
-            <div class="flex flex-col gap-2">
-                ${q.options.map((o, oi) => `
-                    <label class="option-row p-3 rounded-xl flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="q${i}" value="${oi}" class="hidden">
-                        <span class="w-4 h-4 border border-white/20 rounded-full flex-shrink-0"></span>
-                        <span>${o}</span>
-                    </label>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-    
-    renderMath(el('quiz-list'));
-    el('answered-count').textContent = `0 / ${data.length}`;
-    showScreen('quiz');
-    
+  function finishQuiz(auto){
+    if(state.submitted) return;
+    state.submitted = true;
     clearInterval(state.timerId);
-    state.timerId = setInterval(() => {
-        state.remaining--;
-        el('timer-text').textContent = `${Math.floor(state.remaining/60)}:${String(state.remaining%60).padStart(2,'0')}`;
-        el('progress-fill').style.width = `${(state.remaining/state.totalSeconds)*100}%`;
-        if(state.remaining <= 0) finish();
-    }, 1000);
-  });
+    state.timeSpent = state.totalSeconds - Math.max(0, state.remaining);
+    renderResults();
+    showScreen('results');
+  }
 
-  el('quiz-list').addEventListener('change', (e) => {
-    const row = e.target.closest('.option-row');
-    const card = e.target.closest('[data-qidx]');
-    const qidx = card.dataset.qidx;
-    [...card.querySelectorAll('.option-row')].forEach(r => r.classList.remove('selected'));
-    row.classList.add('selected');
-    state.answers[qidx] = parseInt(e.target.value);
-    el('answered-count').textContent = `${state.answers.filter(a=>a!==null).length} / ${state.questions.length}`;
-  });
+  /* ---------------- Results Screen Logic ---------------- */
+  const metricsGrid = el('metrics-grid');
+  const reviewList = el('review-list');
+  const filterTabs = el('filter-tabs');
 
-  const finish = () => {
-    clearInterval(state.timerId);
-    let correct = 0;
-    state.questions.forEach((q, i) => { if(state.answers[i] === q.answer) correct++; });
-    
-    el('metrics-grid').innerHTML = `
-        <div class="card p-4"><p class="text-xs opacity-40">Score</p><p class="text-2xl">${correct}/${state.questions.length}</p></div>
-        <div class="card p-4"><p class="text-xs opacity-40">Accuracy</p><p class="text-2xl">${Math.round(correct/state.questions.length*100)}%</p></div>
+  function computeResults(){
+    let correct = 0, incorrect = 0, skipped = 0;
+    const details = state.questions.map((q, idx) => {
+      const userAns = state.answers[idx];
+      let status;
+      if(userAns === null || userAns === undefined){
+        status = 'skipped'; skipped++;
+      } else if(userAns === q.answer){
+        status = 'correct'; correct++;
+      } else {
+        status = 'incorrect'; incorrect++;
+      }
+      return { q, idx, userAns, status };
+    });
+    const net = (correct * 1) - (incorrect * 0.25);
+    const attempted = correct + incorrect;
+    const accuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
+    return { details, correct, incorrect, skipped, net, accuracy };
+  }
+
+  function metricCard(label, value, colorVar){
+    return `
+      <div class="metric-card px-4 py-4 text-center">
+        <p class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/35 mb-2">${label}</p>
+        <p class="font-display text-2xl sm:text-3xl font-medium" style="${colorVar ? `color:${colorVar}`:''}">${value}</p>
+      </div>
     `;
+  }
 
-    el('review-list').innerHTML = state.questions.map((q, i) => {
-        const userAns = state.answers[i];
-        return `
-            <div class="card p-6">
-                <div class="flex justify-between mb-4">
-                    <p class="font-medium">${q.q}</p>
-                    <span class="text-xs ${userAns === q.answer ? 'text-sage' : 'text-rust'} font-mono">
-                        ${userAns === q.answer ? 'CORRECT' : 'INCORRECT'}
-                    </span>
-                </div>
-                <div class="flex flex-col gap-2">
-                    ${q.options.map((o, oi) => `
-                        <div class="p-3 rounded-xl border ${oi === q.answer ? 'border-sage/50 bg-sage/5' : (oi === userAns ? 'border-rust/50 bg-rust/5' : 'border-hairline')}">
-                            ${o} ${oi === q.answer ? '✓' : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
+  let lastResults = null;
+
+  function renderResults(){
+    const r = computeResults();
+    lastResults = r;
+
+    metricsGrid.innerHTML = [
+      metricCard('Net Score', r.net.toFixed(2), 'var(--accent-bright)'),
+      metricCard('Correct', r.correct, 'var(--success)'),
+      metricCard('Incorrect', r.incorrect, 'var(--danger)'),
+      metricCard('Skipped', r.skipped, 'var(--text-muted)'),
+      metricCard('Accuracy', r.accuracy.toFixed(1) + '%'),
+      metricCard('Time Spent', formatTime(state.timeSpent)),
+    ].join('');
+
+    state.filter = 'all';
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t.dataset.filter === 'all'));
+    renderReviewList(r);
+  }
+
+  function renderReviewList(r){
+    const filtered = r.details.filter(d => state.filter === 'all' ? true : d.status === state.filter);
+    if(filtered.length === 0){
+      reviewList.innerHTML = `<p class="text-center text-white/30 font-mono text-sm py-10">No questions in this filter.</p>`;
+      return;
+    }
+
+    reviewList.innerHTML = filtered.map(d => {
+      const { q, idx, userAns, status } = d;
+      const badgeClass = status === 'correct' ? 'badge-correct' : status === 'incorrect' ? 'badge-incorrect' : 'badge-skipped';
+      const badgeLabel = status.charAt(0).toUpperCase() + status.slice(1);
+
+      const optionsHtml = q.options.map((opt, oi) => {
+        let cls = 'option-row flex items-center gap-3 rounded-xl px-4 py-3';
+        let dotColor = '';
+        if(oi === q.answer){ cls += ' opt-correct'; dotColor = 'var(--success)'; }
+        else if(oi === userAns && status === 'incorrect'){ cls += ' opt-incorrect'; dotColor = 'var(--danger)'; }
+        const marker = oi === q.answer ? '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--success)">✓ correct</span>'
+          : (oi === userAns ? '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--danger)">your pick</span>' : '');
+        return `<div class="${cls}">
+          <span class="radio-dot" style="${dotColor ? `border-color:${dotColor}`:''}"><span class="radio-dot-fill" style="${dotColor ? `transform:scale(1); background:${dotColor}`:''}"></span></span>
+          <span class="text-[15px] leading-snug">${opt}</span>
+          ${marker}
+        </div>`;
+      }).join('');
+
+      return `
+        <div class="card rounded-2xl p-5 sm:p-6">
+          <div class="flex items-start gap-3 mb-4">
+            <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+            <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5 flex-1">${q.q}</p>
+            <span class="badge ${badgeClass} shrink-0">${badgeLabel}</span>
+          </div>
+          <div class="flex flex-col gap-2.5">${optionsHtml}</div>
+        </div>
+      `;
     }).join('');
 
-    renderMath(el('review-list'));
-    showScreen('results');
-  };
+    renderMath(reviewList);
+  }
 
-  el('submit-btn').addEventListener('click', finish);
-  el('restart-btn').addEventListener('click', () => showScreen('setup'));
-  el('load-sample-btn').addEventListener('click', () => {
-    el('json-input').value = JSON.stringify([{q:"What is $2+2$?", options:["3","4","5"], answer:1}], null, 2);
-    validateJson();
+  filterTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-tab');
+    if(!btn || !lastResults) return;
+    state.filter = btn.dataset.filter;
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t === btn));
+    renderReviewList(lastResults);
+  });
+
+  el('restart-btn').addEventListener('click', () => {
+    clearInterval(state.timerId);
+    state.submitted = false;
+    state.answers = [];
+    state.questions = [];
+    showScreen('setup');
   });
 
 })();
