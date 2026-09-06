@@ -9,18 +9,23 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="icon" href="./icon-192.png">
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind (precompiled locally — no runtime CDN dependency) -->
+<link rel="stylesheet" href="./vendor/tailwind.css">
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Fonts (self-hosted) -->
+<link rel="stylesheet" href="./vendor/fonts/fraunces/fraunces.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-sans/400.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-sans/500.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-sans/600.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-mono/400.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-mono/500.css">
+<link rel="stylesheet" href="./vendor/fonts/ibm-plex-mono/600.css">
 
-<!-- KaTeX + mhchem -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/mhchem.min.js"></script>
+<!-- KaTeX + mhchem (self-hosted) -->
+<link rel="stylesheet" href="./vendor/katex/katex.min.css">
+<script defer src="./vendor/katex/katex.min.js"></script>
+<script defer src="./vendor/katex/contrib/auto-render.min.js"></script>
+<script defer src="./vendor/katex/contrib/mhchem.min.js"></script>
 
 <style>
   :root{
@@ -39,7 +44,7 @@
     --line:#D7DEE7;
   }
   html,body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif;}
-  .font-display{font-family:'Fraunces',serif;}
+  .font-display{font-family:'Fraunces Variable','Fraunces',serif; font-optical-sizing:auto;}
   .font-mono{font-family:'IBM Plex Mono',monospace;}
   .bg-paper-card{background:var(--paper-card);}
   .border-line{border-color:var(--line);}
@@ -118,11 +123,14 @@
 
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 
+  .print-only{ display:none; }
+
   @media print{
     body *{ visibility:hidden; }
     #results-screen, #results-screen *{ visibility:visible; }
     #results-screen{ position:absolute; left:0; top:0; width:100%; padding:0 24px; }
     .no-print{ display:none !important; }
+    .print-only{ display:block !important; }
     .q-card{ break-inside:avoid; border-color:#999; }
     body{ background:#fff; }
   }
@@ -248,7 +256,7 @@
     </header>
 
     <!-- print-only heading -->
-    <div class="hidden print:block mb-4">
+    <div class="print-only mb-4">
       <h1 class="font-display text-3xl font-semibold">Ledger — MCQ Results</h1>
       <p id="print-timestamp" class="text-sm text-ink-soft font-mono"></p>
     </div>
@@ -842,8 +850,6 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     });
   }
-
-  window.addEventListener('load', () => renderMath(document.body));
 
 })();
 </script>
