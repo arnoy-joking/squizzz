@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Timed MCQ rehearsal room for Dhaka University admission — OMR rules, saved result history, PDF export, fully offline.">
+<meta name="theme-color" content="#0a0908">
+<title>DU Admission — MCQ Practice</title>
+
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<script src="vendor/katex/katex.min.js"></script>
+<script src="vendor/katex/contrib/auto-render.min.js"></script>
+<script src="vendor/katex/contrib/mhchem.min.js"></script>
+
+<script src="vendor/tailwind-play.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { DEFAULT: '#0a0908', 50:'#f0eae0' },
+          surface: { DEFAULT: '#15130f', 2: '#1c1914' },
+          hairline: '#2b2620',
+          brass: { DEFAULT: '#c9a24b', bright: '#e3c179', dim: '#8a6f36' },
+          sage: '#5fa87d',
+          rust: '#c1584a',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  :root{
+    --bg:#0a0908; --surface:#15130f; --surface-2:#1c1914;
+    --border:#2b2620; --border-soft:#211d18;
+    --text:#f0eae0; --text-muted:#a39c8c; --text-faint:#6b6459;
+    --accent:#c9a24b; --accent-bright:#e3c179; --accent-dim:#8a6f36;
+    --success:#5fa87d; --danger:#c1584a; --skip:#6b6459;
+  }
+  *{-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,75,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(201,162,75,0.04), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .font-display{font-family:'Fraunces',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+
+  ::selection{background:rgba(201,162,75,0.35); color:#fff;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#2b2620; border-radius:8px; border:2px solid var(--bg);}
+  ::-webkit-scrollbar-thumb:hover{background:#3a342a;}
+
+  .card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:16px;
+  }
+
+  .mode-card{
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background .25s ease;
+  }
+  .mode-card:hover{ transform:translateY(-2px); border-color:#3a342a; }
+  .mode-card.active{
+    border-color:var(--accent);
+    background:linear-gradient(180deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+    box-shadow:0 0 0 1px rgba(201,162,75,0.25), 0 10px 30px -12px rgba(201,162,75,0.25);
+  }
+
+  .btn-primary{
+    background:linear-gradient(180deg, var(--accent-bright), var(--accent));
+    color:#1a1408;
+    font-weight:600;
+    transition: box-shadow .25s ease, transform .15s ease, filter .25s ease;
+    box-shadow: 0 6px 24px -8px rgba(201,162,75,0.45);
+  }
+  .btn-primary:hover:not(:disabled){ filter:brightness(1.08); box-shadow:0 10px 32px -8px rgba(201,162,75,0.6); transform:translateY(-1px); }
+  .btn-primary:active:not(:disabled){ transform:translateY(0px) scale(.99); }
+  .btn-primary:disabled{ opacity:.4; cursor:not-allowed; box-shadow:none; }
+
+  .btn-ghost{
+    border:1px solid var(--border);
+    color:var(--text-muted);
+    transition: all .2s ease;
+  }
+  .btn-ghost:hover:not(:disabled){ border-color:var(--accent-dim); color:var(--accent-bright); background:rgba(201,162,75,0.06); }
+  .btn-ghost:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .btn-danger:hover:not(:disabled){ border-color:var(--danger); color:var(--danger); background:rgba(193,88,74,0.08); }
+
+  textarea, input[type="number"]{
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea:focus, input[type="number"]:focus{
+    outline:none; border-color:var(--accent-dim); box-shadow:0 0 0 3px rgba(201,162,75,0.12);
+  }
+
+  .option-row{
+    border:1px solid var(--border);
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .option-row:hover{ border-color:#3a342a; background:rgba(255,255,255,0.02); }
+  .option-row.selected{
+    border-color:var(--accent);
+    background:linear-gradient(90deg, rgba(201,162,75,0.10), rgba(201,162,75,0.02));
+  }
+  /* OMR-style square checkbox — marks are permanent and can stack (the trap). */
+  .radio-dot{
+    width:18px; height:18px; border-radius:5px;
+    border:1.5px solid var(--text-faint);
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color .2s ease;
+    flex-shrink:0;
+  }
+  .option-row.selected .radio-dot{ border-color:var(--accent-bright); }
+  .radio-dot-fill{
+    width:9px; height:9px; border-radius:2px; background:var(--accent-bright);
+    transform:scale(0); transition:transform .18s ease;
+  }
+  .option-row.selected .radio-dot-fill{ transform:scale(1); }
+
+  /* review mode colorings */
+  .opt-correct{ border-color:var(--success) !important; background:linear-gradient(90deg, rgba(95,168,125,0.12), rgba(95,168,125,0.02)) !important; cursor:default; }
+  .opt-incorrect{ border-color:var(--danger) !important; background:linear-gradient(90deg, rgba(193,88,74,0.12), rgba(193,88,74,0.02)) !important; cursor:default; }
+
+  .progress-track{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-fill{
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent-bright));
+    transition:width 1s linear;
+  }
+  .progress-ticks{
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(0,0,0,0.35) 23px, rgba(0,0,0,0.35) 24px);
+    pointer-events:none;
+  }
+
+  .timer-text{ transition: color .3s ease; }
+  .timer-danger{ color:var(--danger) !important; animation: pulse-red 1.4s ease-in-out infinite; }
+  @keyframes pulse-red{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+
+  .fade-in{ animation: fadeIn .5s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .stagger > *{ animation: fadeIn .45s ease both; }
+
+  .badge{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em;
+    padding:3px 10px; border-radius:999px; font-weight:600;
+  }
+  .badge-correct{ background:rgba(95,168,125,0.14); color:var(--success); border:1px solid rgba(95,168,125,0.35); }
+  .badge-incorrect{ background:rgba(193,88,74,0.14); color:var(--danger); border:1px solid rgba(193,88,74,0.35); }
+  .badge-skipped{ background:rgba(163,156,140,0.12); color:var(--text-muted); border:1px solid var(--border); }
+  .badge-multi{ background:rgba(193,88,74,0.2); color:var(--danger); border:1px solid rgba(193,88,74,0.5); }
+
+  .filter-tab{
+    transition:all .2s ease; border:1px solid var(--border); color:var(--text-muted);
+  }
+  .filter-tab.active{
+    border-color:var(--accent); color:var(--accent-bright); background:rgba(201,162,75,0.08);
+  }
+
+  .qnum{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--accent-bright);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+  }
+
+  .metric-card{
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--border);
+    border-radius:14px;
+  }
+
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, textarea:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent-bright); outline-offset:2px;
+  }
+
+  .katex{ font-size:1.05em; }
+  .katex-display{ margin:0.6em 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  .fixed-topbar{
+    background:rgba(10,9,8,0.85);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+
+  .float-submit{
+    box-shadow:0 12px 40px -10px rgba(201,162,75,0.5);
+  }
+
+  .divider-brass{
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  }
+
+  .collapse-wrapper{
+    display:grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows .4s cubic-bezier(.4,0,.2,1);
+  }
+  .collapse-wrapper.collapsed{
+    grid-template-rows: 0fr;
+  }
+  .collapse-inner{
+    overflow:hidden;
+    min-height:0;
+  }
+
+  .saved-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    color:var(--success); border:1px solid rgba(95,168,125,0.35);
+    background:rgba(95,168,125,0.1);
+    padding:4px 12px; border-radius:999px;
+  }
+
+  #toast{
+    position:fixed;
+    left:50%; bottom:28px;
+    transform:translateX(-50%) translateY(16px);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    box-shadow:0 16px 44px -12px rgba(0,0,0,0.65);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease;
+    z-index:100;
+    max-width:90vw;
+    text-align:center;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #toast.toast-error{ border-color:var(--danger); color:var(--danger); }
+
+  /* ============ PDF export document (light print theme) ============
+     Rendered at the top-left corner of the viewport while an opaque
+     "Preparing PDF…" overlay covers the screen; html2canvas captures
+     this element directly and the app slices it into A4 pages. */
+  .pdf-doc{
+    position:fixed; left:0; top:0; z-index:9000;
+    pointer-events:none;
+    width:720px;
+    background:#ffffff; color:#1c1917;
+    font-family:'Inter',sans-serif; font-size:13px; line-height:1.5;
+    padding:6px 10px 24px;
+  }
+  .pdf-doc .pdf-kicker{
+    font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.22em;
+    text-transform:uppercase; color:#8a6f36; font-weight:600;
+  }
+  .pdf-doc .pdf-title{
+    font-family:'Fraunces',serif; font-size:26px; font-weight:600; color:#0a0908; margin-top:2px;
+  }
+  .pdf-doc .pdf-date{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:#6b6459; text-align:right; line-height:1.7;
+  }
+  .pdf-doc .pdf-head{
+    border-bottom:2.5px solid #c9a24b; padding-bottom:12px; margin-bottom:14px;
+  }
+  .pdf-doc .pdf-meta{
+    display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:10px;
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:#57534e;
+  }
+  .pdf-doc .pdf-meta b{ color:#1c1917; }
+  .pdf-doc .pdf-scores{
+    display:flex; gap:8px; margin-bottom:16px;
+  }
+  .pdf-doc .pdf-score{
+    flex:1; border:1px solid #e7e0d4; border-radius:8px; padding:8px 6px; text-align:center;
+    background:#fdfcf9;
+  }
+  .pdf-doc .pdf-score .lbl{
+    font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.12em;
+    text-transform:uppercase; color:#8a8279;
+  }
+  .pdf-doc .pdf-score .val{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; margin-top:3px; color:#0a0908; }
+  .pdf-doc .pdf-q{
+    border:1px solid #e7e0d4; border-radius:10px; padding:12px 14px; margin-bottom:10px;
+  }
+  .pdf-doc .pdf-q-head{ display:flex; align-items:flex-start; gap:9px; }
+  .pdf-doc .pdf-qnum{
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#8a6f36;
+    border:1px solid #e0d5bd; border-radius:6px; padding:3px 7px; flex-shrink:0; margin-top:1px;
+  }
+  .pdf-doc .pdf-qtext{ flex:1; font-size:13.5px; color:#1c1917; }
+  .pdf-doc .pdf-status{
+    font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.05em;
+    padding:3px 9px; border-radius:999px; flex-shrink:0; text-transform:uppercase; margin-top:1px;
+  }
+  .pdf-doc .s-correct{ background:#e9f5ee; color:#2f7d52; border:1px solid #bfe0cd; }
+  .pdf-doc .s-incorrect{ background:#fbeceb; color:#b04a3d; border:1px solid #eed0cc; }
+  .pdf-doc .s-skipped{ background:#f1f0ee; color:#6b6459; border:1px solid #dedbd5; }
+  .pdf-doc .pdf-multi{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:#b04a3d; margin:7px 0 0;
+  }
+  .pdf-doc .pdf-opt{
+    border:1px solid #ece5d8; border-radius:8px; padding:7px 10px; margin-top:6px;
+    display:flex; align-items:center; gap:9px; background:#fff;
+  }
+  .pdf-doc .pdf-opt.ok{ border-color:#9ccfb2; background:#f0f9f3; }
+  .pdf-doc .pdf-opt.bad{ border-color:#e2b3ac; background:#fdf1ef; }
+  .pdf-doc .pdf-bubble{
+    width:13px; height:13px; border-radius:4px; border:1.5px solid #b9b2a6; flex-shrink:0;
+  }
+  .pdf-doc .pdf-opt.ok .pdf-bubble{ border-color:#2f7d52; background:#2f7d52; }
+  .pdf-doc .pdf-opt.bad .pdf-bubble{ border-color:#b04a3d; background:#b04a3d; }
+  .pdf-doc .pdf-opttext{ flex:1; font-size:12.5px; color:#292524; }
+  .pdf-doc .pdf-mark{
+    font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; flex-shrink:0;
+  }
+  .pdf-doc .pdf-mark.ok{ color:#2f7d52; }
+  .pdf-doc .pdf-mark.bad{ color:#b04a3d; }
+  .pdf-doc .pdf-foot{
+    margin-top:18px; padding-top:10px; border-top:1px solid #e7e0d4;
+    font-family:'JetBrains Mono',monospace; font-size:9px; color:#a39c8c; text-align:center;
+  }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- ============= SETUP SCREEN ============= -->
+<section id="screen-setup" class="screen active min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-10 sm:py-16">
+
+    <!-- utility row -->
+    <div class="fade-in flex items-center justify-end gap-2 mb-8 flex-wrap">
+      <span id="offline-chip" class="hidden font-mono text-[10px] tracking-wider uppercase text-white/35 border border-white/10 rounded-full px-3 py-1.5">● offline-ready</span>
+      <button id="install-btn" hidden class="btn-ghost rounded-full px-4 py-2 text-xs font-medium whitespace-nowrap">⬇ Install app</button>
+      <button id="history-btn" class="btn-ghost rounded-full px-4 py-2 text-xs font-medium whitespace-nowrap">
+        🗂 Past results <span id="history-count" class="font-mono text-brass" style="color:var(--accent-bright)"></span>
+      </button>
+    </div>
+
+    <div class="fade-in mb-12 sm:mb-16 text-center">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-4">ঢাকা বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি</p>
+      <h1 class="font-display text-4xl sm:text-6xl font-medium tracking-tight leading-[1.05]">
+        Practice with<br class="sm:hidden"> <span class="italic text-brass-bright" style="color:var(--accent-bright)">precision</span>.
+      </h1>
+      <p class="text-[15px] sm:text-base text-white/50 mt-5 max-w-md mx-auto leading-relaxed">
+        A focused MCQ rehearsal room for Dhaka University admission — timed, distraction-free, and built for the exact way you'll be tested.
+      </p>
+    </div>
+
+    <!-- Mode selection -->
+    <div class="fade-in mb-10" style="animation-delay:.08s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">01 — Select Intensity</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="mode-grid">
+        <button data-mode="average" data-seconds="45" class="mode-card active card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Average</p>
+          <p class="font-mono text-xs text-white/40">45s / question</p>
+        </button>
+        <button data-mode="fast" data-seconds="30" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Fast</p>
+          <p class="font-mono text-xs text-white/40">30s / question</p>
+        </button>
+        <button data-mode="lightspeed" data-seconds="15" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Lightspeed</p>
+          <p class="font-mono text-xs text-white/40">15s / question</p>
+        </button>
+        <button data-mode="custom" data-seconds="0" class="mode-card card rounded-2xl px-4 py-5 text-left">
+          <p class="font-display text-lg mb-1">Custom</p>
+          <p class="font-mono text-xs text-white/40">your own pace</p>
+        </button>
+      </div>
+      <div id="custom-seconds-wrap" class="hidden mt-4">
+        <label class="text-xs text-white/40 font-mono uppercase tracking-wider block mb-2">Seconds per question</label>
+        <input type="number" id="custom-seconds" min="5" max="600" value="40" class="w-full sm:w-48 rounded-xl px-4 py-2.5 font-mono text-sm">
+      </div>
+    </div>
+
+    <!-- JSON input -->
+    <div class="fade-in mb-10" style="animation-delay:.14s">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">02 — Load Questions</span>
+        <div class="divider-brass flex-1"></div>
+      </div>
+
+      <div class="card rounded-2xl p-5 sm:p-6">
+
+        <div id="shared-banner" class="items-center gap-3 rounded-xl px-4 py-3 mb-4" style="display:none; border:1px solid var(--accent-dim); background:rgba(201,162,75,0.08);">
+          <span class="text-lg leading-none">🔗</span>
+          <p class="text-sm text-white/75 flex-1">Shared quiz loaded — <span id="shared-count" class="text-brass font-semibold">0</span> questions ready. Pick a mode above to begin.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <button id="toggle-json-btn" type="button" class="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-white/45 hover:text-brass transition-colors">
+            <span id="toggle-json-chevron" class="inline-block transition-transform duration-300" style="transform:rotate(-90deg)">▾</span>
+            <span id="toggle-json-label">Show JSON editor</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button id="copy-link-btn" disabled class="btn-ghost rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap disabled:opacity-30 disabled:cursor-not-allowed">
+              🔗 Copy shareable link
+            </button>
+            <button id="load-sample-btn" class="btn-ghost rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap">
+              Load sample
+            </button>
+          </div>
+        </div>
+
+        <div id="json-collapse" class="collapse-wrapper collapsed mt-4">
+          <div class="collapse-inner">
+            <div class="text-xs text-white/45 leading-relaxed max-w-xl mb-3">
+              <p class="text-white/70 font-medium mb-1.5">Expected JSON array format</p>
+              <pre class="font-mono text-[11px] text-white/40 bg-black/30 rounded-lg p-3 overflow-x-auto leading-relaxed border border-white/5">[{
+  "q": "What is the unit of force in $F = ma$?",
+  "options": ["$\\text{N}$", "$\\text{J}$", "$\\ce{H2O}$", "$\\text{W}$"],
+  "answer": 0
+}]</pre>
+              <p class="mt-2 text-white/35">Use <span class="text-brass">$...$</span> for inline math/physics and <span class="text-brass">\ce{...}</span> for chemistry — rendered via KaTeX + mhchem. <span class="font-mono text-white/50">answer</span> is the 0-indexed correct option. Once loaded, use <span class="text-brass">Copy shareable link</span> to send this exact question set to anyone — it travels compressed inside the URL itself, no server or database involved.</p>
+            </div>
+
+            <textarea id="json-input" rows="10" placeholder="Paste your JSON array of questions here…" class="w-full rounded-xl px-4 py-3.5 font-mono text-[13px] leading-relaxed resize-y"></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
+          <p id="json-status" class="text-xs font-mono text-white/30">No questions loaded yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Launch -->
+    <div class="fade-in flex flex-col items-center gap-3" style="animation-delay:.2s">
+      <button id="launch-btn" disabled class="btn-primary rounded-full px-10 py-4 text-base font-display tracking-wide">
+        Launch Practice
+      </button>
+      <p class="text-xs text-white/30 font-mono" id="launch-hint">Load valid questions to continue</p>
+      <p class="text-[11px] text-white/30 max-w-sm text-center leading-relaxed mt-1">
+        OMR rules apply — every mark is permanent, and a question with more than one marked option scores as incorrect.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============= QUIZ SCREEN ============= -->
+<section id="screen-quiz" class="screen min-h-screen pb-32">
+  <div class="fixed-topbar fixed top-0 left-0 right-0 z-40">
+    <div class="max-w-3xl mx-auto px-5 sm:px-8 py-4">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Time remaining</p>
+          <p id="timer-text" class="timer-text font-mono text-2xl font-semibold leading-none mt-0.5">00:00</p>
+        </div>
+        <div class="text-right">
+          <p class="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">Answered</p>
+          <p id="answered-count" class="font-mono text-2xl font-semibold leading-none mt-0.5 text-white/80">0 <span class="text-white/30 text-base">/ 0</span></p>
+        </div>
+      </div>
+      <div class="progress-track rounded-full h-2 w-full">
+        <div id="progress-fill" class="progress-fill h-full rounded-full relative" style="width:100%">
+          <div class="progress-ticks"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 pt-32 sm:pt-28">
+    <p class="text-center font-mono text-[11px] text-white/30 mb-5">Every tap is permanent — marks cannot be removed, just like the OMR sheet.</p>
+    <div id="quiz-list" class="stagger flex flex-col gap-5"></div>
+  </div>
+
+  <div class="fixed bottom-6 sm:bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
+    <button id="submit-btn" class="float-submit btn-primary pointer-events-auto rounded-full px-9 py-4 font-display text-base tracking-wide">
+      Submit Test
+    </button>
+  </div>
+</section>
+
+<!-- ============= RESULTS SCREEN ============= -->
+<section id="screen-results" class="screen min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in text-center mb-4">
+      <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-3" style="color:var(--accent)">Evaluation</p>
+      <h2 class="font-display text-3xl sm:text-5xl font-medium tracking-tight">Your results</h2>
+      <p id="result-context-line" class="font-mono text-[11px] text-white/35 mt-3"></p>
+    </div>
+
+    <div class="fade-in flex justify-center mb-10">
+      <span id="saved-chip" class="saved-chip hidden">✓ Saved to history</span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="fade-in grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10" id="metrics-grid" style="animation-delay:.06s"></div>
+
+    <!-- Filters -->
+    <div class="fade-in flex items-center gap-2 mb-6 flex-wrap" id="filter-tabs" style="animation-delay:.1s">
+      <button data-filter="all" class="filter-tab active rounded-full px-4 py-2 text-sm font-medium">All</button>
+      <button data-filter="correct" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Correct</button>
+      <button data-filter="incorrect" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Incorrect</button>
+      <button data-filter="skipped" class="filter-tab rounded-full px-4 py-2 text-sm font-medium">Skipped</button>
+    </div>
+
+    <div id="review-list" class="stagger flex flex-col gap-5 mb-12"></div>
+
+    <div class="fade-in flex justify-center gap-3 flex-wrap">
+      <button id="pdf-btn" class="btn-primary rounded-full px-7 py-3.5 text-sm font-display tracking-wide">
+        ⬇ Download PDF
+      </button>
+      <button id="restart-btn" class="btn-ghost rounded-full px-7 py-3.5 text-sm font-medium">
+        ← Start a new practice
+      </button>
+      <button id="back-history-btn" class="btn-ghost rounded-full px-7 py-3.5 text-sm font-medium hidden">
+        ← Back to past results
+      </button>
+      <button id="delete-result-btn" class="btn-ghost btn-danger rounded-full px-7 py-3.5 text-sm font-medium hidden">
+        🗑 Delete this result
+      </button>
+      <button id="results-history-btn" class="btn-ghost rounded-full px-7 py-3.5 text-sm font-medium">
+        🗂 Past results
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============= HISTORY SCREEN ============= -->
+<section id="screen-history" class="screen min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 sm:px-8 py-14 sm:py-20">
+
+    <div class="fade-in flex items-start justify-between gap-4 mb-10 flex-wrap">
+      <div>
+        <p class="font-mono text-[11px] tracking-[0.25em] uppercase text-brass mb-3" style="color:var(--accent)">Archive</p>
+        <h2 class="font-display text-3xl sm:text-5xl font-medium tracking-tight">Past results</h2>
+        <p class="text-sm text-white/40 mt-3">Every submitted test is stored locally on this device (IndexedDB) — nothing leaves your browser.</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button id="delete-all-btn" class="btn-ghost btn-danger rounded-full px-5 py-2.5 text-xs font-medium whitespace-nowrap">🗑 Delete all</button>
+        <button id="history-back-btn" class="btn-ghost rounded-full px-5 py-2.5 text-xs font-medium whitespace-nowrap">← New practice</button>
+      </div>
+    </div>
+
+    <div id="history-list" class="stagger flex flex-col gap-4"></div>
+  </div>
+</section>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Sample Data ---------------- */
+  const sampleQuestions = [
+    { q: "Differentiate: $\\dfrac{d}{dx}\\left(x^3 - 4x^2 + 2x\\right)$ equals?", options: ["$3x^2 - 8x + 2$", "$3x^2 - 4x + 2$", "$x^2 - 8x + 2$", "$3x^3 - 8x + 2$"], answer: 0 },
+    { q: "Evaluate: $\\displaystyle\\int_0^{\\pi} \\sin x \\, dx$", options: ["$0$", "$1$", "$2$", "$\\pi$"], answer: 2 },
+    { q: "If $\\log_2 x = 5$, what is the value of $x$?", options: ["$10$", "$25$", "$32$", "$16$"], answer: 2 },
+    { q: "The roots of $x^2 - 5x + 6 = 0$ are:", options: ["$1, 6$", "$2, 3$", "$-2, -3$", "$2, -3$"], answer: 1 },
+    { q: "A force $F = ma$ acts on a body of mass $2\\text{ kg}$ producing acceleration $3\\text{ m/s}^2$. Find $F$.", options: ["$5\\text{ N}$", "$6\\text{ N}$", "$1.5\\text{ N}$", "$9\\text{ N}$"], answer: 1 },
+    { q: "The SI unit of electric resistance is:", options: ["$\\text{Ampere}$", "$\\text{Volt}$", "$\\Omega \\;(\\text{Ohm})$", "$\\text{Farad}$"], answer: 2 },
+    { q: "Using $v = u + at$, find $v$ when $u = 0$, $a = 10\\text{ m/s}^2$, $t = 5\\text{ s}$.", options: ["$25\\text{ m/s}$", "$50\\text{ m/s}$", "$10\\text{ m/s}$", "$5\\text{ m/s}$"], answer: 1 },
+    { q: "Kinetic energy is given by $KE = \\dfrac{1}{2}mv^2$. If $m = 4\\text{ kg}$ and $v = 3\\text{ m/s}$, find $KE$.", options: ["$12\\text{ J}$", "$18\\text{ J}$", "$36\\text{ J}$", "$9\\text{ J}$"], answer: 1 },
+    { q: "Balance the equation: $\\ce{N2 + H2 -> NH3}$. What is the coefficient of $\\ce{H2}$?", options: ["$1$", "$2$", "$3$", "$4$"], answer: 2 },
+    { q: "What is produced when $\\ce{CaCO3}$ is heated strongly?", options: ["$\\ce{CaO + CO2}$", "$\\ce{Ca + O2}$", "$\\ce{CaC2 + O2}$", "$\\ce{Ca(OH)2}$"], answer: 0 },
+    { q: "The pH of a neutral aqueous solution at $25^{\\circ}\\text{C}$ is:", options: ["$0$", "$7$", "$14$", "$1$"], answer: 1 },
+    { q: "In $\\ce{2H2 + O2 -> 2H2O}$, how many moles of water form from $4$ moles of $\\ce{H2}$?", options: ["$2$", "$4$", "$1$", "$8$"], answer: 1 },
+  ];
+
+  /* ---------------- State ---------------- */
+  const state = {
+    mode: 'average',
+    secondsPerQ: 45,
+    questions: [],
+    answers: [],       // ARRAY OF ARRAYS: each question holds the list of marked option indices (permanent OMR marks)
+    totalSeconds: 0,
+    remaining: 0,
+    timerId: null,
+    submitted: false,
+    startedAt: null,
+    timeSpent: 0,
+    filter: 'all',
+    viewContext: 'live',    // 'live' (just submitted) | 'history' (viewing a saved record)
+    currentRecordId: null,  // id of the saved record being viewed
+  };
+
+  const MODE_LABELS = { average:'Average', fast:'Fast', lightspeed:'Lightspeed', custom:'Custom' };
+
+  /* ---------------- Elements ---------------- */
+  const el = (id) => document.getElementById(id);
+  const screens = {
+    setup: el('screen-setup'),
+    quiz: el('screen-quiz'),
+    results: el('screen-results'),
+    history: el('screen-history'),
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+    window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+  }
+
+  /* ---------------- KaTeX render helper ---------------- */
+  function renderMath(container){
+    if(window.renderMathInElement){
+      renderMathInElement(container, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false},
+        ],
+        throwOnError:false,
+      });
+    }
+  }
+
+  /* ---------------- Toast ---------------- */
+  const toastEl = el('toast');
+  let toastTimer = null;
+  function toast(msg, isError){
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('toast-error', !!isError);
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3600);
+  }
+
+  /* ---------------- IndexedDB (result archive) ---------------- */
+  const DB_NAME = 'du-mcq-db';
+  const DB_VERSION = 1;
+  const STORE = 'results';
+  let dbPromise = null;
+  let idbAvailable = ('indexedDB' in window);
+
+  function openDB(){
+    if(!dbPromise){
+      dbPromise = new Promise((resolve, reject) => {
+        try{
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if(!db.objectStoreNames.contains(STORE)){
+              const store = db.createObjectStore(STORE, { keyPath:'id', autoIncrement:true });
+              store.createIndex('savedAt', 'savedAt');
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+          req.onblocked = () => reject(new Error('Database upgrade blocked.'));
+        }catch(err){ idbAvailable = false; reject(err); }
+      }).catch(err => { idbAvailable = false; throw err; });
+    }
+    return dbPromise;
+  }
+
+  function idbSave(record){
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const req = tx.objectStore(STORE).add(record);
+      req.onsuccess = () => resolve(req.result);
+      tx.onerror = () => reject(tx.error);
+    }));
+  }
+  function idbAll(){
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const req = tx.objectStore(STORE).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    }));
+  }
+  function idbDelete(id){
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    }));
+  }
+  function idbClear(){
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).clear();
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    }));
+  }
+
+  /* ---------------- Share-link compression ----------------
+     Questions are re-encoded into a compact positional array
+     (dropping the repeated "q"/"options"/"answer" key names),
+     minified, deflate-compressed, and base64url-encoded — all
+     stored entirely in the URL hash (#quiz=...). The hash is never
+     sent to the server, so this works on any static host (Vercel,
+     GitHub Pages, etc.) with zero backend and zero storage. */
+  const SUPPORTS_COMPRESSION = ('CompressionStream' in window) && ('DecompressionStream' in window);
+
+  function bytesToBase64Url(bytes){
+    let binary = '';
+    for(let i=0; i<bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function base64UrlToBytes(b64url){
+    let b64 = b64url.replace(/-/g,'+').replace(/_/g,'/');
+    while(b64.length % 4) b64 += '=';
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+  // [q, options[], answer] instead of {q, options, answer} — cuts the repeated
+  // key names out of the payload entirely, shrinking it before compression even runs.
+  function toCompactForm(data){
+    return data.map(item => [item.q, item.options, item.answer]);
+  }
+  function fromCompactForm(compact){
+    if(!Array.isArray(compact)) throw new Error('Malformed shared data.');
+    return compact.map((item, i) => {
+      if(!Array.isArray(item) || item.length < 3) throw new Error(`Malformed question ${i+1} in shared data.`);
+      return { q: item[0], options: item[1], answer: item[2] };
+    });
+  }
+  // 'Z' prefix = compact form, deflate-raw compressed. 'P' prefix = compact form,
+  // uncompressed (fallback for browsers without CompressionStream support).
+  async function compressToParam(data){
+    const str = JSON.stringify(toCompactForm(data));
+    const raw = new TextEncoder().encode(str);
+    if(SUPPORTS_COMPRESSION){
+      const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+      const buf = await new Response(stream).arrayBuffer();
+      return 'Z' + bytesToBase64Url(new Uint8Array(buf));
+    }
+    return 'P' + bytesToBase64Url(raw);
+  }
+  async function decompressFromParam(param){
+    const flag = param.charAt(0);
+    const bytes = base64UrlToBytes(param.slice(1));
+    let jsonStr;
+    if(flag === 'Z'){
+      if(!SUPPORTS_COMPRESSION) throw new Error('This browser can\'t open compressed links — please update it.');
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      jsonStr = await new Response(stream).text();
+    } else if(flag === 'P'){
+      jsonStr = new TextDecoder().decode(bytes);
+    } else {
+      throw new Error('Unrecognized share-link format.');
+    }
+    return fromCompactForm(JSON.parse(jsonStr));
+  }
+  async function buildShareUrl(data){
+    const param = await compressToParam(data);
+    const url = new URL(window.location.href);
+    url.hash = 'quiz=' + param;
+    return url.toString();
+  }
+  async function copyToClipboard(text){
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  }
+  function formatByteLen(n){
+    return n < 1024 ? `${n} chars` : `${(n/1024).toFixed(1)}KB`;
+  }
+
+
+  /* ---------------- Setup Screen Logic ---------------- */
+  const modeGrid = el('mode-grid');
+  const customWrap = el('custom-seconds-wrap');
+  const customSecondsInput = el('custom-seconds');
+
+  modeGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-card');
+    if(!btn) return;
+    [...modeGrid.children].forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    if(state.mode === 'custom'){
+      customWrap.classList.remove('hidden');
+      state.secondsPerQ = parseInt(customSecondsInput.value, 10) || 40;
+    } else {
+      customWrap.classList.add('hidden');
+      state.secondsPerQ = parseInt(btn.dataset.seconds, 10);
+    }
+  });
+  customSecondsInput.addEventListener('input', () => {
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 5);
+    }
+  });
+
+  const jsonInput = el('json-input');
+  const jsonStatus = el('json-status');
+  const launchBtn = el('launch-btn');
+  const launchHint = el('launch-hint');
+  const copyLinkBtn = el('copy-link-btn');
+  const sharedBanner = el('shared-banner');
+  const sharedCount = el('shared-count');
+  const jsonCollapse = el('json-collapse');
+  const toggleJsonBtn = el('toggle-json-btn');
+  const toggleJsonChevron = el('toggle-json-chevron');
+  const toggleJsonLabel = el('toggle-json-label');
+
+  function setJsonCollapsed(collapsed){
+    jsonCollapse.classList.toggle('collapsed', collapsed);
+    toggleJsonChevron.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleJsonLabel.textContent = collapsed ? 'Show JSON editor' : 'Hide JSON editor';
+  }
+  toggleJsonBtn.addEventListener('click', () => {
+    setJsonCollapsed(!jsonCollapse.classList.contains('collapsed'));
+  });
+
+  el('load-sample-btn').addEventListener('click', () => {
+    jsonInput.value = JSON.stringify(sampleQuestions, null, 2);
+    sharedBanner.style.display = 'none';
+    setJsonCollapsed(false);
+    validateJson();
+  });
+
+  // A genuine keystroke means the person is editing by hand — the "shared quiz" framing no longer applies.
+  jsonInput.addEventListener('input', () => { sharedBanner.style.display = 'none'; });
+
+  function validateJson(){
+    const raw = jsonInput.value.trim();
+    if(!raw){
+      jsonStatus.textContent = 'No questions loaded yet.';
+      jsonStatus.style.color = '';
+      launchBtn.disabled = true;
+      copyLinkBtn.disabled = true;
+      launchHint.textContent = 'Load valid questions to continue';
+      return null;
+    }
+    try{
+      const data = JSON.parse(raw);
+      if(!Array.isArray(data) || data.length === 0) throw new Error('Must be a non-empty array.');
+      data.forEach((item, i) => {
+        if(typeof item.q !== 'string') throw new Error(`Question ${i+1} missing "q" string.`);
+        if(!Array.isArray(item.options) || item.options.length < 2) throw new Error(`Question ${i+1} needs an "options" array.`);
+        if(typeof item.answer !== 'number' || item.answer < 0 || item.answer >= item.options.length) throw new Error(`Question ${i+1} has invalid "answer" index.`);
+      });
+      jsonStatus.textContent = `✓ ${data.length} question${data.length>1?'s':''} loaded successfully.`;
+      jsonStatus.style.color = 'var(--success)';
+      launchBtn.disabled = false;
+      copyLinkBtn.disabled = false;
+      launchHint.textContent = `Ready — ${data.length} question${data.length>1?'s':''}, ${state.secondsPerQ}s each`;
+      return data;
+    }catch(err){
+      jsonStatus.textContent = `✗ ${err.message}`;
+      jsonStatus.style.color = 'var(--danger)';
+      launchBtn.disabled = true;
+      copyLinkBtn.disabled = true;
+      launchHint.textContent = 'Fix the JSON to continue';
+      return null;
+    }
+  }
+  jsonInput.addEventListener('input', validateJson);
+
+  copyLinkBtn.addEventListener('click', async () => {
+    const data = validateJson();
+    if(!data) return;
+    const original = copyLinkBtn.textContent;
+    copyLinkBtn.disabled = true;
+    copyLinkBtn.textContent = 'Compressing…';
+    try{
+      const url = await buildShareUrl(data);
+      await copyToClipboard(url);
+      toast(`Link copied — ${formatByteLen(url.length)} for ${data.length} question${data.length>1?'s':''}`);
+    }catch(err){
+      toast('Could not build a share link in this browser.', true);
+    }finally{
+      copyLinkBtn.disabled = false;
+      copyLinkBtn.textContent = original;
+    }
+  });
+
+  /* ---------------- Load quiz from a shared link (#quiz=...) ---------------- */
+  async function initFromShareLink(){
+    const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    if(!rawHash) return;
+    const params = new URLSearchParams(rawHash);
+    const param = params.get('quiz');
+    if(!param) return;
+    try{
+      const parsed = await decompressFromParam(param);
+      jsonInput.value = JSON.stringify(parsed, null, 2);
+      const validated = validateJson();
+      if(validated){
+        sharedCount.textContent = validated.length;
+        sharedBanner.style.display = 'flex';
+        setJsonCollapsed(true);
+        toast(`Shared quiz loaded — ${validated.length} questions. Pick a mode to begin.`);
+      } else {
+        toast('The shared link loaded, but its questions look malformed.', true);
+      }
+    }catch(err){
+      toast('This shared link looks corrupted or unsupported.', true);
+    }
+  }
+  initFromShareLink();
+
+  launchBtn.addEventListener('click', () => {
+    const data = validateJson();
+    if(!data) return;
+    if(state.mode === 'custom'){
+      state.secondsPerQ = Math.max(5, parseInt(customSecondsInput.value,10) || 40);
+    }
+    state.questions = data;
+    state.answers = data.map(() => []);   // every question starts with zero marks; marks are permanent once made
+    state.totalSeconds = data.length * state.secondsPerQ;
+    state.remaining = state.totalSeconds;
+    state.submitted = false;
+    startQuiz();
+  });
+
+  /* ---------------- Quiz Screen Logic ---------------- */
+  const quizList = el('quiz-list');
+  const timerText = el('timer-text');
+  const progressFill = el('progress-fill');
+  const answeredCount = el('answered-count');
+  const submitBtn = el('submit-btn');
+
+  function buildQuestionCard(q, idx){
+    const wrap = document.createElement('div');
+    wrap.className = 'card rounded-2xl p-5 sm:p-6';
+    wrap.dataset.qidx = idx;
+
+    const optionsHtml = q.options.map((opt, oi) => `
+      <div class="option-row flex items-center gap-3 rounded-xl px-4 py-3" data-oidx="${oi}" role="checkbox" aria-checked="false" tabindex="0">
+        <span class="radio-dot"><span class="radio-dot-fill"></span></span>
+        <span class="text-[15px] leading-snug">${opt}</span>
+      </div>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="flex items-start gap-3 mb-4">
+        <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+        <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5">${q.q}</p>
+      </div>
+      <div class="flex flex-col gap-2.5">${optionsHtml}</div>
+    `;
+    return wrap;
+  }
+
+  function renderQuiz(){
+    quizList.innerHTML = '';
+    state.questions.forEach((q, idx) => {
+      quizList.appendChild(buildQuestionCard(q, idx));
+    });
+    renderMath(quizList);
+    updateAnsweredCount();
+  }
+
+  // OMR rule: clicking an option ADDS a permanent mark. Marks can never be
+  // removed or toggled off — and stacking 2+ marks voids the question. (Silent trap:
+  // no warnings are shown; the student discovers the damage in the results.)
+  function markOption(card, qidx, oidx){
+    const marks = state.answers[qidx];
+    if(marks.includes(oidx)) return;      // already marked — nothing happens, no unmarking
+    marks.push(oidx);
+    updateOptionVisuals(card, marks);
+    updateAnsweredCount();
+  }
+
+  quizList.addEventListener('click', (e) => {
+    const optRow = e.target.closest('.option-row');
+    if(!optRow) return;
+    const card = e.target.closest('[data-qidx]');
+    if(!card) return;
+    const qidx = parseInt(card.dataset.qidx, 10);
+    const oidx = parseInt(optRow.dataset.oidx, 10);
+    markOption(card, qidx, oidx);
+  });
+  quizList.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const optRow = e.target.closest('.option-row');
+    if(!optRow) return;
+    e.preventDefault();
+    const card = e.target.closest('[data-qidx]');
+    if(!card) return;
+    markOption(card, parseInt(card.dataset.qidx,10), parseInt(optRow.dataset.oidx,10));
+  });
+
+  function updateOptionVisuals(card, marks){
+    card.querySelectorAll('.option-row').forEach(row => {
+      const oi = parseInt(row.dataset.oidx, 10);
+      const on = marks.includes(oi);
+      row.classList.toggle('selected', on);
+      row.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+  }
+
+  function updateAnsweredCount(){
+    const answered = state.answers.filter(a => a.length > 0).length;
+    answeredCount.innerHTML = `${answered} <span class="text-white/30 text-base">/ ${state.questions.length}</span>`;
+  }
+
+  function formatTime(totalSec){
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  function startQuiz(){
+    renderQuiz();
+    timerText.textContent = formatTime(state.remaining);
+    timerText.classList.remove('timer-danger');
+    progressFill.style.width = '100%';
+    state.startedAt = Date.now();
+    showScreen('quiz');
+    clearInterval(state.timerId);
+    state.timerId = setInterval(tick, 1000);
+  }
+
+  function tick(){
+    state.remaining -= 1;
+    const pct = Math.max(0, (state.remaining / state.totalSeconds) * 100);
+    progressFill.style.width = pct + '%';
+    timerText.textContent = formatTime(Math.max(0, state.remaining));
+    if(pct <= 15){
+      timerText.classList.add('timer-danger');
+    }
+    if(state.remaining <= 0){
+      clearInterval(state.timerId);
+      finishQuiz(true);
+    }
+  }
+
+  submitBtn.addEventListener('click', () => finishQuiz(false));
+
+  function finishQuiz(auto){
+    if(state.submitted) return;
+    state.submitted = true;
+    clearInterval(state.timerId);
+    state.timeSpent = state.totalSeconds - Math.max(0, state.remaining);
+
+    // Build a storable record (full snapshot of questions + marks).
+    const record = {
+      savedAt: new Date().toISOString(),
+      mode: state.mode,
+      modeLabel: MODE_LABELS[state.mode] || state.mode,
+      secondsPerQ: state.secondsPerQ,
+      totalSeconds: state.totalSeconds,
+      timeSpent: state.timeSpent,
+      questions: JSON.parse(JSON.stringify(state.questions)),
+      answers: JSON.parse(JSON.stringify(state.answers)),
+    };
+
+    state.viewContext = 'live';
+    state.currentRecordId = null;
+    renderResultsView(record);
+    showScreen('results');
+
+    // Persist to IndexedDB (fire-and-forget with UI feedback).
+    const savedChip = el('saved-chip');
+    savedChip.classList.add('hidden');
+    function setChip(text, ok){
+      savedChip.textContent = text;
+      savedChip.style.color = ok ? '' : 'var(--danger)';
+      savedChip.style.borderColor = ok ? '' : 'rgba(193,88,74,0.4)';
+      savedChip.style.background = ok ? '' : 'rgba(193,88,74,0.1)';
+      savedChip.classList.remove('hidden');
+    }
+    if(idbAvailable){
+      idbSave(record)
+        .then((id) => {
+          state.currentRecordId = id;
+          record.id = id;
+          setChip('✓ Saved to history', true);
+          refreshHistoryCount();
+          toast(auto ? 'Time up — result saved to history ✓' : 'Result saved to history ✓');
+        })
+        .catch((err) => {
+          console.error('IndexedDB save failed:', err);
+          setChip('⚠ Could not save to history', false);
+          toast('This result could not be saved to history.', true);
+        });
+    } else {
+      setChip('⚠ Storage unavailable in this browser', false);
+    }
+  }
+
+  /* ---------------- Results Logic ---------------- */
+  const metricsGrid = el('metrics-grid');
+  const reviewList = el('review-list');
+  const filterTabs = el('filter-tabs');
+
+  // answers[idx] is an array of marked option indices.
+  //   0 marks            → skipped
+  //   exactly 1 correct  → correct
+  //   anything else      → incorrect (including the multi-mark trap)
+  function computeResults(questions, answers){
+    let correct = 0, incorrect = 0, skipped = 0;
+    const details = questions.map((q, idx) => {
+      const marks = Array.isArray(answers[idx]) ? answers[idx] : [];
+      let status;
+      if(marks.length === 0){
+        status = 'skipped'; skipped++;
+      } else if(marks.length === 1 && marks[0] === q.answer){
+        status = 'correct'; correct++;
+      } else {
+        status = 'incorrect'; incorrect++;
+      }
+      return { q, idx, marks, status };
+    });
+    const net = (correct * 1) - (incorrect * 0.25);
+    const attempted = correct + incorrect;
+    const accuracy = attempted > 0 ? (correct / attempted) * 100 : 0;
+    return { details, correct, incorrect, skipped, net, accuracy };
+  }
+
+  function metricCard(label, value, colorVar){
+    return `
+      <div class="metric-card px-4 py-4 text-center">
+        <p class="font-mono text-[10px] tracking-[0.15em] uppercase text-white/35 mb-2">${label}</p>
+        <p class="font-display text-2xl sm:text-3xl font-medium" style="${colorVar ? `color:${colorVar}`:''}">${value}</p>
+      </div>
+    `;
+  }
+
+  let lastResults = null;   // computed results object for the record currently on screen
+  let lastRecord = null;    // the record currently on screen (for PDF / delete)
+
+  function fmtDate(iso){
+    try{
+      return new Date(iso).toLocaleString(undefined, { dateStyle:'medium', timeStyle:'short' });
+    }catch(e){ return iso; }
+  }
+
+  function renderResultsView(record){
+    lastRecord = record;
+    const r = computeResults(record.questions, record.answers);
+    lastResults = r;
+
+    metricsGrid.innerHTML = [
+      metricCard('Net Score', r.net.toFixed(2), 'var(--accent-bright)'),
+      metricCard('Correct', r.correct, 'var(--success)'),
+      metricCard('Incorrect', r.incorrect, 'var(--danger)'),
+      metricCard('Skipped', r.skipped, 'var(--text-muted)'),
+      metricCard('Accuracy', r.accuracy.toFixed(1) + '%'),
+      metricCard('Time Spent', formatTime(record.timeSpent || 0)),
+    ].join('');
+
+    const isHistory = state.viewContext === 'history';
+    el('result-context-line').textContent =
+      `${record.modeLabel || ''} · ${record.secondsPerQ}s/question · ${record.questions.length} questions · ${fmtDate(record.savedAt)}`;
+    el('restart-btn').classList.toggle('hidden', isHistory);
+    el('results-history-btn').classList.toggle('hidden', isHistory);
+    el('back-history-btn').classList.toggle('hidden', !isHistory);
+    el('delete-result-btn').classList.toggle('hidden', !isHistory || record.id == null);
+
+    if(isHistory){
+      const chip = el('saved-chip');
+      chip.classList.remove('hidden');
+      chip.textContent = '🗂 From your saved history';
+      chip.style.color = '';
+      chip.style.borderColor = '';
+      chip.style.background = '';
+    }
+
+    state.filter = 'all';
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t.dataset.filter === 'all'));
+    renderReviewList(r);
+  }
+
+  function renderReviewList(r){
+    const filtered = r.details.filter(d => state.filter === 'all' ? true : d.status === state.filter);
+    if(filtered.length === 0){
+      reviewList.innerHTML = `<p class="text-center text-white/30 font-mono text-sm py-10">No questions in this filter.</p>`;
+      return;
+    }
+
+    reviewList.innerHTML = filtered.map(d => {
+      const { q, idx, marks, status } = d;
+      const badgeClass = status === 'correct' ? 'badge-correct' : status === 'incorrect' ? 'badge-incorrect' : 'badge-skipped';
+      const badgeLabel = status.charAt(0).toUpperCase() + status.slice(1);
+      const multiNote = marks.length > 1
+        ? `<p class="font-mono text-[11px] mt-2" style="color:var(--danger)">⚠ ${marks.length} options marked — scored as incorrect</p>`
+        : '';
+
+      const optionsHtml = q.options.map((opt, oi) => {
+        const isAnswer = oi === q.answer;
+        const isMarked = marks.includes(oi);
+        let cls = 'option-row flex items-center gap-3 rounded-xl px-4 py-3';
+        let dotColor = '';
+        if(isAnswer){ cls += ' opt-correct'; dotColor = 'var(--success)'; }
+        else if(isMarked){ cls += ' opt-incorrect'; dotColor = 'var(--danger)'; }
+        let marker = '';
+        if(isAnswer && isMarked && status === 'correct'){
+          marker = '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--success)">✓ your pick</span>';
+        } else if(isAnswer){
+          marker = '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--success)">✓ correct</span>';
+        } else if(isMarked){
+          marker = '<span class="font-mono text-[10px] ml-auto pl-3" style="color:var(--danger)">✗ your mark</span>';
+        }
+        return `<div class="${cls}">
+          <span class="radio-dot" style="${dotColor ? `border-color:${dotColor}`:''}"><span class="radio-dot-fill" style="${dotColor ? `transform:scale(1); background:${dotColor}`:''}"></span></span>
+          <span class="text-[15px] leading-snug">${opt}</span>
+          ${marker}
+        </div>`;
+      }).join('');
+
+      return `
+        <div class="card rounded-2xl p-5 sm:p-6">
+          <div class="flex items-start gap-3 mb-1">
+            <span class="qnum rounded-lg px-2.5 py-1 text-xs font-semibold shrink-0">Q${String(idx+1).padStart(2,'0')}</span>
+            <p class="text-[16px] sm:text-[17px] leading-relaxed pt-0.5 flex-1">${q.q}</p>
+            <span class="badge ${badgeClass} shrink-0">${badgeLabel}</span>
+          </div>
+          ${multiNote ? `<div class="pl-12 sm:pl-14">${multiNote}</div>` : ''}
+          <div class="flex flex-col gap-2.5 mt-3">${optionsHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    renderMath(reviewList);
+  }
+
+  filterTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-tab');
+    if(!btn || !lastResults) return;
+    state.filter = btn.dataset.filter;
+    [...filterTabs.children].forEach(t => t.classList.toggle('active', t === btn));
+    renderReviewList(lastResults);
+  });
+
+  el('restart-btn').addEventListener('click', () => {
+    clearInterval(state.timerId);
+    state.submitted = false;
+    state.answers = [];
+    state.questions = [];
+    showScreen('setup');
+  });
+
+  el('back-history-btn').addEventListener('click', () => {
+    openHistory();
+  });
+
+  el('results-history-btn').addEventListener('click', () => {
+    openHistory();
+  });
+
+  el('delete-result-btn').addEventListener('click', async () => {
+    if(!lastRecord || lastRecord.id == null) return;
+    if(!confirm('Delete this result from your history? This cannot be undone.')) return;
+    try{
+      await idbDelete(lastRecord.id);
+      toast('Result deleted.');
+      refreshHistoryCount();
+      openHistory();
+    }catch(err){
+      console.error(err);
+      toast('Could not delete the result.', true);
+    }
+  });
+
+  /* ---------------- History Screen ---------------- */
+  const historyList = el('history-list');
+  const historyCount = el('history-count');
+  let historyRecords = [];
+
+  async function refreshHistoryCount(){
+    if(!idbAvailable){ historyCount.textContent = ''; return; }
+    try{
+      const all = await idbAll();
+      historyCount.textContent = all.length ? `(${all.length})` : '';
+    }catch(err){ historyCount.textContent = ''; }
+  }
+
+  async function openHistory(){
+    showScreen('history');
+    historyList.innerHTML = `<p class="text-center text-white/30 font-mono text-sm py-10">Loading…</p>`;
+    if(!idbAvailable){
+      historyList.innerHTML = `<p class="text-center text-white/30 font-mono text-sm py-10">Storage is unavailable in this browser — results cannot be archived.</p>`;
+      el('delete-all-btn').disabled = true;
+      return;
+    }
+    try{
+      const all = await idbAll();
+      historyRecords = all.sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+      el('delete-all-btn').disabled = historyRecords.length === 0;
+      renderHistoryList();
+    }catch(err){
+      console.error(err);
+      historyList.innerHTML = `<p class="text-center font-mono text-sm py-10" style="color:var(--danger)">Could not read saved results.</p>`;
+    }
+  }
+
+  function renderHistoryList(){
+    if(historyRecords.length === 0){
+      historyList.innerHTML = `
+        <div class="card rounded-2xl px-6 py-14 text-center">
+          <p class="text-3xl mb-3">🗂</p>
+          <p class="font-display text-xl mb-2">No results yet</p>
+          <p class="text-sm text-white/40 max-w-xs mx-auto">Submit a practice test and it will be archived here automatically — with full answers, forever, even offline.</p>
+        </div>`;
+      return;
+    }
+    historyList.innerHTML = historyRecords.map(rec => {
+      const r = rec.stats || computeResults(rec.questions, rec.answers);
+      return `
+      <div class="card rounded-2xl p-5" data-id="${rec.id}">
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <p class="font-mono text-[11px] text-white/35 uppercase tracking-wider">${fmtDate(rec.savedAt)}</p>
+            <p class="font-display text-lg mt-1">${rec.modeLabel || '—'} <span class="text-white/35 text-sm font-sans">· ${rec.secondsPerQ}s/q · ${rec.questions.length} questions</span></p>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="font-mono text-[10px] uppercase tracking-wider text-white/35">Net score</p>
+            <p class="font-display text-2xl font-medium" style="color:var(--accent-bright)">${r.net.toFixed(2)}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap mb-4">
+          <span class="badge badge-correct">✓ ${r.correct}</span>
+          <span class="badge badge-incorrect">✗ ${r.incorrect}</span>
+          <span class="badge badge-skipped">– ${r.skipped}</span>
+          <span class="font-mono text-[11px] text-white/30 ml-auto">${r.accuracy.toFixed(1)}% · ${formatTime(rec.timeSpent || 0)}</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn-ghost rounded-xl px-4 py-2 text-xs font-medium" data-act="view">View answers</button>
+          <button class="btn-ghost rounded-xl px-4 py-2 text-xs font-medium" data-act="pdf">⬇ PDF</button>
+          <button class="btn-ghost btn-danger rounded-xl px-4 py-2 text-xs font-medium" data-act="del">🗑 Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  historyList.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    const card = btn.closest('[data-id]');
+    if(!card) return;
+    const id = Number(card.dataset.id);
+    const rec = historyRecords.find(r => r.id === id);
+    if(!rec) return;
+    const act = btn.dataset.act;
+
+    if(act === 'view'){
+      state.viewContext = 'history';
+      state.currentRecordId = id;
+      renderResultsView(rec);
+      showScreen('results');
+    } else if(act === 'pdf'){
+      btn.disabled = true;
+      const prev = btn.textContent;
+      btn.textContent = 'Preparing…';
+      await downloadPdf(rec, btn);
+      btn.textContent = prev;
+      btn.disabled = false;
+    } else if(act === 'del'){
+      if(!confirm(`Delete the result from ${fmtDate(rec.savedAt)}? This cannot be undone.`)) return;
+      try{
+        await idbDelete(id);
+        historyRecords = historyRecords.filter(r => r.id !== id);
+        renderHistoryList();
+        refreshHistoryCount();
+        el('delete-all-btn').disabled = historyRecords.length === 0;
+        toast('Result deleted.');
+      }catch(err){
+        console.error(err);
+        toast('Could not delete the result.', true);
+      }
+    }
+  });
+
+  el('delete-all-btn').addEventListener('click', async () => {
+    if(historyRecords.length === 0) return;
+    if(!confirm(`Delete ALL ${historyRecords.length} saved result${historyRecords.length>1?'s':''}? This cannot be undone.`)) return;
+    try{
+      await idbClear();
+      historyRecords = [];
+      renderHistoryList();
+      refreshHistoryCount();
+      el('delete-all-btn').disabled = true;
+      toast('All results deleted.');
+    }catch(err){
+      console.error(err);
+      toast('Could not clear the archive.', true);
+    }
+  });
+
+  el('history-btn').addEventListener('click', () => { openHistory(); });
+  el('history-back-btn').addEventListener('click', () => { showScreen('setup'); refreshHistoryCount(); });
+
+  /* ---------------- PDF Export (jsPDF + html2canvas) ---------------- */
+  function pdfFileName(record){
+    const d = new Date(record.savedAt || Date.now());
+    const p = (n) => String(n).padStart(2,'0');
+    return `DU-MCQ-Result-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.pdf`;
+  }
+
+  function buildPdfElement(record, r){
+    const holder = document.createElement('div');
+    holder.className = 'pdf-doc';
+
+    const statusText = (d) => {
+      if(d.status === 'correct') return ['Correct','s-correct'];
+      if(d.status === 'skipped') return ['Skipped','s-skipped'];
+      return ['Incorrect','s-incorrect'];
+    };
+
+    const questionsHtml = r.details.map(d => {
+      const [label, cls] = statusText(d);
+      const multi = d.marks.length > 1
+        ? `<div class="pdf-multi">⚠ ${d.marks.length} options marked — scored as incorrect (OMR rule)</div>` : '';
+      const opts = d.q.options.map((opt, oi) => {
+        const isAnswer = oi === d.q.answer;
+        const isMarked = d.marks.includes(oi);
+        let rowCls = 'pdf-opt';
+        let mark = '';
+        if(isAnswer && isMarked && d.status === 'correct'){ rowCls += ' ok'; mark = '<span class="pdf-mark ok">✓ your pick</span>'; }
+        else if(isAnswer){ rowCls += ' ok'; mark = '<span class="pdf-mark ok">✓ correct answer</span>'; }
+        else if(isMarked){ rowCls += ' bad'; mark = '<span class="pdf-mark bad">✗ your mark</span>'; }
+        return `<div class="${rowCls}"><span class="pdf-bubble"></span><span class="pdf-opttext">${opt}</span>${mark}</div>`;
+      }).join('');
+      return `
+        <div class="pdf-q">
+          <div class="pdf-q-head">
+            <span class="pdf-qnum">Q${String(d.idx+1).padStart(2,'0')}</span>
+            <span class="pdf-qtext">${d.q.q}</span>
+            <span class="pdf-status ${cls}">${label}</span>
+          </div>
+          ${multi}
+          ${opts}
+        </div>`;
+    }).join('');
+
+    holder.innerHTML = `
+      <div class="pdf-head">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+          <div>
+            <div class="pdf-kicker">ঢাকা বিশ্ববিদ্যালয় ভর্তি প্রস্তুতি · DU Admission — MCQ Practice</div>
+            <div class="pdf-title">Result Report</div>
+          </div>
+          <div class="pdf-date">${fmtDate(record.savedAt)}<br>${record.modeLabel || ''} mode · ${record.secondsPerQ}s / question</div>
+        </div>
+        <div class="pdf-meta">
+          <span>Questions: <b>${record.questions.length}</b></span>
+          <span>Time spent: <b>${formatTime(record.timeSpent || 0)}</b></span>
+          <span>Marking: <b>+1 correct · −0.25 incorrect</b></span>
+          <span>OMR rule: <b>multiple marks = incorrect</b></span>
+        </div>
+      </div>
+      <div class="pdf-scores">
+        <div class="pdf-score"><div class="lbl">Net Score</div><div class="val" style="color:#8a6f36">${r.net.toFixed(2)}</div></div>
+        <div class="pdf-score"><div class="lbl">Correct</div><div class="val" style="color:#2f7d52">${r.correct}</div></div>
+        <div class="pdf-score"><div class="lbl">Incorrect</div><div class="val" style="color:#b04a3d">${r.incorrect}</div></div>
+        <div class="pdf-score"><div class="lbl">Skipped</div><div class="val" style="color:#6b6459">${r.skipped}</div></div>
+        <div class="pdf-score"><div class="lbl">Accuracy</div><div class="val">${r.accuracy.toFixed(1)}%</div></div>
+      </div>
+      ${questionsHtml}
+      <div class="pdf-foot">Generated locally by DU MCQ Practice · ${fmtDate(new Date().toISOString())} · Net = correct − 0.25 × incorrect</div>
+    `;
+    return holder;
+  }
+
+  async function downloadPdf(record, btn){
+    if(!window.jspdf || !window.jspdf.jsPDF || !window.html2canvas){
+      toast('PDF libraries failed to load — check your connection once, then it works offline.', true);
+      return;
+    }
+    const r = computeResults(record.questions, record.answers);
+    const pdfEl = buildPdfElement(record, r);
+
+    // Opaque cover so the light print document never flashes on screen.
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:13px;color:var(--text-muted);';
+    overlay.textContent = '⏳ Preparing PDF…';
+    document.body.appendChild(overlay);
+    document.body.appendChild(pdfEl);
+    renderMath(pdfEl);
+    try{
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      await new Promise(res => setTimeout(res, 150)); // let KaTeX + webfonts settle
+
+      // 1) Rasterize the light-theme document at 2× for crisp text.
+      const canvas = await html2canvas(pdfEl, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+      });
+
+      // 2) Slice the canvas into A4 pages at question-card boundaries
+      //    (a card taller than a page falls back to raw slicing).
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' });
+      const mX = 12, mT = 10, mB = 12;
+      const pageWmm = 210 - mX * 2;
+      const pageHmm = 297 - mT - mB;
+      const pxPerMm = canvas.width / pageWmm;
+      const chunkPx = Math.floor(pageHmm * pxPerMm);
+
+      const SCALE = 2;
+      const GAP = Math.round(12 * SCALE);
+      const blocks = Array.from(pdfEl.children).map(c => ({
+        top: Math.round(c.offsetTop * SCALE),
+        h: Math.round(c.offsetHeight * SCALE),
+      }));
+
+      // Pack blocks into pages without splitting them.
+      const pages = [];
+      let cur = [], curH = 0;
+      for(const b of blocks){
+        if(cur.length && curH + b.h > chunkPx){
+          if(b.h > chunkPx){
+            // Oversized block: raw-slice it across its own pages.
+            if(cur.length){ pages.push(cur); }
+            let off = 0;
+            while(off < b.h){
+              const h = Math.min(chunkPx, b.h - off);
+              pages.push([{ top: b.top + off, h }]);
+              off += h;
+            }
+            cur = []; curH = 0;
+            continue;
+          }
+          pages.push(cur);
+          cur = []; curH = 0;
+        }
+        cur.push(b);
+        curH += b.h + GAP;
+      }
+      if(cur.length) pages.push(cur);
+
+      pages.forEach((pg, i) => {
+        const drawnH = Math.min(chunkPx, pg.reduce((s,b)=>s+b.h,0) + GAP * (pg.length - 1));
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = drawnH;
+        const ctx = slice.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, slice.width, slice.height);
+        let cursor = 0;
+        for(const b of pg){
+          ctx.drawImage(canvas, 0, b.top, canvas.width, b.h, 0, cursor, canvas.width, b.h);
+          cursor += b.h + GAP;
+        }
+        if(i > 0) pdf.addPage();
+        pdf.addImage(slice.toDataURL('image/jpeg', 0.94), 'JPEG', mX, mT, pageWmm, drawnH / pxPerMm, undefined, 'FAST');
+      });
+      pdf.save(pdfFileName(record));
+      toast('PDF downloaded ✓');
+    }catch(err){
+      console.error('PDF generation failed:', err);
+      toast('Could not generate the PDF.', true);
+    }finally{
+      pdfEl.remove();
+      overlay.remove();
+    }
+  }
+
+  el('pdf-btn').addEventListener('click', async (e) => {
+    if(!lastRecord) return;
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    const prev = btn.textContent;
+    btn.textContent = 'Preparing PDF…';
+    await downloadPdf(lastRecord, btn);
+    btn.textContent = prev;
+    btn.disabled = false;
+  });
+
+  /* ---------------- PWA: service worker, install prompt, connectivity ---------------- */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
+
+  let deferredInstallPrompt = null;
+  const installBtn = el('install-btn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installBtn.hidden = false;
+  });
+  installBtn.addEventListener('click', async () => {
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    try{
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if(outcome === 'accepted') toast('Installing…');
+    }catch(err){ /* user dismissed */ }
+    deferredInstallPrompt = null;
+    installBtn.hidden = true;
+  });
+  window.addEventListener('appinstalled', () => {
+    installBtn.hidden = true;
+    toast('App installed — it now works fully offline ✓');
+  });
+
+  const offlineChip = el('offline-chip');
+  function updateConnectivityChip(){
+    offlineChip.classList.toggle('hidden', !('serviceWorker' in navigator));
+  }
+  updateConnectivityChip();
+  window.addEventListener('offline', () => toast('You are offline — everything still works ✓'));
+  window.addEventListener('online', () => toast('Back online.'));
+
+  /* ---------------- Init ---------------- */
+  refreshHistoryCount();
+
+})();
+</script>
+</body>
+</html>
