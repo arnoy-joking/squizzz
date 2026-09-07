@@ -544,6 +544,9 @@
       <button id="pdf-btn" class="btn-primary rounded-full px-7 py-3.5 text-sm font-display tracking-wide">
         ⬇ Download PDF
       </button>
+      <button id="share-quiz-btn" title="Shares the question set only — your answers stay on this device" class="btn-ghost rounded-full px-7 py-3.5 text-sm font-medium">
+        🔗 Share this quiz
+      </button>
       <button id="restart-btn" class="btn-ghost rounded-full px-7 py-3.5 text-sm font-medium">
         ← Start a new practice
       </button>
@@ -875,6 +878,44 @@
     return url.toString();
   }
 
+  /* One shared code path for every "share this question set" button
+     (setup screen, results screen, history cards). */
+  async function shareQuestionSet(data){
+    let url = null, code = null;
+    if(supabaseEnabled()){
+      try{
+        const saved = await saveQuizSet(data);
+        code = saved.code;
+        cacheShare(code, saved.payload);
+        url = buildShortUrl(code);
+      }catch(sbErr){
+        console.warn('Supabase share failed — falling back to URL link:', sbErr);
+      }
+    }
+    if(!url) url = await buildShareUrl(data);
+    await copyToClipboard(url);   // clipboard issues must not look like Supabase issues
+    if(code){
+      toast(`Short link copied — code ${code} (${formatByteLen(url.length)})`);
+    } else if(supabaseEnabled()){
+      toast('Supabase unreachable — copied the long self-contained link instead.', true);
+    } else {
+      toast(`Link copied — ${formatByteLen(url.length)} for ${data.length} question${data.length>1?'s':''}`);
+    }
+  }
+  async function busyWhile(btn, fn){
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = supabaseEnabled() ? 'Uploading…' : 'Compressing…';
+    try{ await fn(); }
+    catch(err){
+      console.error(err);
+      toast('Could not build or copy a share link in this browser.', true);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
 
   /* ---------------- Setup Screen Logic ---------------- */
   const modeGrid = el('mode-grid');
@@ -967,39 +1008,10 @@
   }
   jsonInput.addEventListener('input', validateJson);
 
-  copyLinkBtn.addEventListener('click', async () => {
+  copyLinkBtn.addEventListener('click', () => {
     const data = validateJson();
     if(!data) return;
-    const original = copyLinkBtn.textContent;
-    copyLinkBtn.disabled = true;
-    copyLinkBtn.textContent = supabaseEnabled() ? 'Uploading…' : 'Compressing…';
-    try{
-      let url = null, code = null;
-      if(supabaseEnabled()){
-        try{
-          const saved = await saveQuizSet(data);
-          code = saved.code;
-          cacheShare(code, saved.payload);
-          url = buildShortUrl(code);
-        }catch(sbErr){
-          console.warn('Supabase share failed — falling back to URL link:', sbErr);
-        }
-      }
-      if(!url) url = await buildShareUrl(data);
-      await copyToClipboard(url);           // clipboard issues must not look like Supabase issues
-      if(code){
-        toast(`Short link copied — code ${code} (${formatByteLen(url.length)})`);
-      } else if(supabaseEnabled()){
-        toast('Supabase unreachable — copied the long self-contained link instead.', true);
-      } else {
-        toast(`Link copied — ${formatByteLen(url.length)} for ${data.length} question${data.length>1?'s':''}`);
-      }
-    }catch(err){
-      toast('Could not build or copy a share link in this browser.', true);
-    }finally{
-      copyLinkBtn.disabled = false;
-      copyLinkBtn.textContent = original;
-    }
+    busyWhile(copyLinkBtn, () => shareQuestionSet(data));
   });
 
   /* ---------------- Load quiz from a shared link ----------------
@@ -1495,6 +1507,7 @@
         <div class="flex gap-2 flex-wrap">
           <button class="btn-ghost rounded-xl px-4 py-2 text-xs font-medium" data-act="view">View answers</button>
           <button class="btn-ghost rounded-xl px-4 py-2 text-xs font-medium" data-act="pdf">⬇ PDF</button>
+          <button class="btn-ghost rounded-xl px-4 py-2 text-xs font-medium" data-act="share" title="Share this question set — answers stay on your device">🔗 Share</button>
           <button class="btn-ghost btn-danger rounded-xl px-4 py-2 text-xs font-medium" data-act="del">🗑 Delete</button>
         </div>
       </div>`;
@@ -1523,6 +1536,8 @@
       await downloadPdf(rec, btn);
       btn.textContent = prev;
       btn.disabled = false;
+    } else if(act === 'share'){
+      await busyWhile(btn, () => shareQuestionSet(rec.questions));
     } else if(act === 'del'){
       if(!confirm(`Delete the result from ${fmtDate(rec.savedAt)}? This cannot be undone.`)) return;
       try{
@@ -1745,6 +1760,11 @@
     }
   }
 
+  el('share-quiz-btn').addEventListener('click', (e) => {
+    if(!lastRecord) return;
+    busyWhile(e.currentTarget, () => shareQuestionSet(lastRecord.questions));
+  });
+
   el('pdf-btn').addEventListener('click', async (e) => {
     if(!lastRecord) return;
     const btn = e.currentTarget;
@@ -1800,5 +1820,5 @@
 
 })();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a37499fd5d078a55',t:'MTc4ODc3MjQ0OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
