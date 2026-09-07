@@ -2,7 +2,7 @@
    Precaches the full app shell (including KaTeX fonts and all vendor libs)
    so the PWA works completely offline after the first visit. */
 
-const CACHE_VERSION = 'du-mcq-v3';
+const CACHE_VERSION = 'du-mcq-v4';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
